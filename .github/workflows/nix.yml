@@ -18,3 +18,5 @@ jobs:
         extra_nix_config: |
           experimental-features = nix-command flakes
     - run: nix build -L --show-trace
+    - name: Test simple
+      run: ./result/bin/rust-nix-templater test

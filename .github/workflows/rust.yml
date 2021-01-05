@@ -20,3 +20,5 @@ jobs:
       run: cargo check --verbose
     - name: Build
       run: cargo build --verbose
+    - name: Test simple
+      run: cargo run --verbose -- test
