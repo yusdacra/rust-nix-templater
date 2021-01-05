@@ -1,0 +1,13 @@
+[package]
+name = "rust-nix-templater"
+version = "0.1.0"
+authors = ["Yusuf Bera Ertan <y.bera003.06@protonmail.com>"]
+edition = "2018"
+license = "MIT"
+description = "Generates Nix files for Rust applications."
+repository = "https://github.com/yusdacra/rust-nix-templater"
+
+[dependencies]
+tera = { version = "1", default-features = false }
+include_dir = "0.6"
+structopt = "0.3"

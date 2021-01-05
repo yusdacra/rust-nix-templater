@@ -1,0 +1,11 @@
+# Rust
+/target/
+**/*.rs.bk
+
+# Nix
+/result*
+/nix/result*
+
+# Direnv
+/.direnv
+/.envrc
