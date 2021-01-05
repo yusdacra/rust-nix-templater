@@ -19,4 +19,4 @@ jobs:
           experimental-features = nix-command flakes
     - run: nix build -L --show-trace
     - name: Test simple
-      run: nix run . -- test
+      run: nix run .

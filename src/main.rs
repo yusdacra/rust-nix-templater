@@ -11,6 +11,7 @@ const NOT_RENDERED_FILE_PATHS: &[&str] = &[
     "nix/envrc",
     ".gitignore",
 ];
+const GITHUB_CI: &str = ".github/workflows/nix.yml";
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "rust-nix-templater")]
@@ -18,6 +19,9 @@ struct Options {
     /// Create a desktop file
     #[structopt(long = "mk-desktop-file")]
     make_desktop_file: bool,
+    /// Create CI files for GitHub
+    #[structopt(long)]
+    github_ci: bool,
 
     /// The output dir where rendered files will be put in.
     #[structopt(short, long)]
@@ -47,6 +51,10 @@ struct Options {
     package_executable: Option<String>,
 }
 
+enum CiType {
+    Github,
+}
+
 fn main() {
     // Make sure we can parse our templates
     let tera = {
@@ -61,6 +69,15 @@ fn main() {
 
     // Get options
     let options = Options::from_args();
+    let ci_types = {
+        let mut ci_types = Vec::new();
+
+        if options.github_ci {
+            ci_types.push(CiType::Github);
+        }
+
+        ci_types
+    };
 
     // Construct Context from options
     let context = build_context_from_opts(&options);
@@ -75,7 +92,7 @@ fn main() {
 
     println!("💾 Writing rendered files...");
     let rendered_files = vec![("nix/build.nix", build_nix), ("flake.nix", flake_nix)];
-    write_files(out_dir.as_path(), rendered_files);
+    write_files(out_dir.as_path(), rendered_files, ci_types);
 
     println!("  - Formatting files...");
     try_fmt(out_dir.as_path());
@@ -95,7 +112,11 @@ fn try_fmt(out_dir: &std::path::Path) {
     }
 }
 
-fn write_files(out_dir: &std::path::Path, rendered_files: Vec<(&str, String)>) {
+fn write_files(
+    out_dir: &std::path::Path,
+    rendered_files: Vec<(&str, String)>,
+    ci_types: Vec<CiType>,
+) {
     use std::fs;
 
     // Create out dir and other dirs we need
@@ -107,6 +128,16 @@ fn write_files(out_dir: &std::path::Path, rendered_files: Vec<(&str, String)>) {
         let write_to = out_dir.join(path);
 
         fs::write(write_to, contents).unwrap();
+    }
+    for ci in ci_types {
+        match ci {
+            CiType::Github => {
+                let path = out_dir.join(GITHUB_CI);
+
+                fs::create_dir_all(path.parent().unwrap()).unwrap();
+                fs::write(path, get_string!(GITHUB_CI)).unwrap();
+            }
+        }
     }
 
     // Write rendered files
