@@ -9,6 +9,7 @@ USAGE:
     rust-nix-templater [FLAGS] [OPTIONS] <package-name>
 
 FLAGS:
+        --github-ci          Create CI files for GitHub
     -h, --help               Prints help information
         --mk-desktop-file    Create a desktop file
     -V, --version            Prints version information
