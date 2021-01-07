@@ -7,7 +7,7 @@
       inputs.nixpkgs = nixpkgs;
     };
     flakeUtils.url = "github:numtide/flake-utils";
-    nixpkgs.url = "github:NixOS/nixpkgs";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nixpkgsMoz = {
       url = "github:mozilla/nixpkgs-mozilla";
       flake = false;
