@@ -6,12 +6,13 @@ let
   rustChannel =
     let
       channel = mozPkgs.rustChannelOf {
-        channel = "stable";
-        sha256 = "sha256-KCh2UBGtdlBJ/4UOqZlxUtcyefv7MH1neoVNV4z0nWs=";
+        {% if rust_toolchain_file %} rustToolchain = "../rust-toolchain"; {% else %} channel = "{{ rust_toolchain_channel }}"; {% endif %}
+        # Replace this with the expected hash that Nix will output when trying to build the package.
+        sha256 = pkgs.lib.fakeHash;
       };
     in
     channel // {
-      rust = channel.rust.override { extensions = [ "rust-src" ]; };
+      rust = channel.rust.override { extensions = [ "rust-src" "rustfmt-preview" "clippy-preview" ]; };
     };
 in
 rec {

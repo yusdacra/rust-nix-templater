@@ -9,5 +9,11 @@ repository = "https://github.com/yusdacra/rust-nix-templater"
 
 [dependencies]
 tera = { version = "1", default-features = false }
-include_dir = "0.6"
 structopt = "0.3"
+
+[profile.release]
+# Since we don't have any performance need, we optimize for size
+opt-level = 'z'
+lto = "thin"
+codegen-units = 1
+panic = 'abort'

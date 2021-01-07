@@ -12,7 +12,7 @@ let
       };
     in
     channel // {
-      rust = channel.rust.override { extensions = [ "rust-src" ]; };
+      rust = channel.rust.override { extensions = [ "rust-src" "rustfmt-preview" "clippy-preview" ]; };
     };
 in
 rec {
