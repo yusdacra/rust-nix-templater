@@ -33,7 +33,7 @@
         apps = builtins.mapAttrs (n: v: mkApp { name = n; drv = v; exePath = "/bin/{{ package_executable }}"; }) packages;
         defaultApp = apps."{{ package_name }}";
 
-        devShell = (import ./nix/devShell.nix) common;
+        devShell = import ./nix/devShell.nix { inherit common; };
       }
     );
 }

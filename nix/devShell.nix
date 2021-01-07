@@ -1,4 +1,4 @@
-common:
+{ common }:
 with common; with pkgs;
 mkShell {
   name = "rust-nix-templater-devShell";

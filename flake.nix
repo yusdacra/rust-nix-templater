@@ -33,7 +33,7 @@
         apps = builtins.mapAttrs (n: v: mkApp { name = n; drv = v; exePath = "/bin/rust-nix-templater"; }) packages;
         defaultApp = apps.rust-nix-templater;
 
-        devShell = (import ./nix/devShell.nix) common;
+        devShell = import ./nix/devShell.nix { inherit common; };
       }
     );
 }
