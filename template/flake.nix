@@ -30,7 +30,7 @@
         };
         defaultPackage = packages."{{ package_name }}";
 
-        apps = builtins.mapAttrs (n: v: mkApp { name = n; drv = v; exePath = "/bin/{% if package_executable %}{{ package_executable }}{% else %}{{ package_name }}{% endif %}"; }) packages;
+        apps = builtins.mapAttrs (n: v: mkApp { name = n; drv = v; exePath = "/bin/{{ package_executable }}"; }) packages;
         defaultApp = apps."{{ package_name }}";
 
         devShell = (import ./nix/devShell.nix) common;

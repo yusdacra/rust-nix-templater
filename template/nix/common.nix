@@ -29,7 +29,7 @@ rec {
     ];
   };
 
-  /* You might need this if you application utilizes a GUI. Note that the dependencies
+  /* You might need this if your application utilizes a GUI. Note that the dependencies
     might change from application to application. The example dependencies provided here
     are for a typical iced application that uses Vulkan underneath.
 

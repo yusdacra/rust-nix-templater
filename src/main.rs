@@ -10,23 +10,40 @@ use std::{
 use structopt::StructOpt;
 use tera::{Context, Tera};
 
-const GITHUB_CI: &str = ".github/workflows/nix.yml";
-const BUILD_NIX: &str = "nix/build.nix";
-const FLAKE_NIX: &str = "flake.nix";
-const COMMON_NIX: &str = "nix/common.nix";
+macro_str! {
+    GITHUB_CI, ".github/workflows/nix.yml";
+    BUILD, "nix/build.nix";
+    FLAKE, "flake.nix";
+    COMMON, "nix/common.nix";
+}
+
+#[macro_export]
+macro_rules! macro_str {
+    {
+        $( $name:ident, $str:expr; )*
+    } => {
+        $(
+            macro_rules! $name {
+                () => {
+                    $str
+                };
+            }
+        )*
+    };
+}
 
 include_template_files! {
     "nix/default.nix",
     "nix/devShell.nix",
     "nix/shell.nix",
     "nix/envrc",
-    "nix/build.nix",
-    "nix/common.nix",
-    "flake.nix",
     ".gitignore",
-    ".github/workflows/nix.yml",
+    BUILD!(),
+    COMMON!(),
+    FLAKE!(),
+    GITHUB_CI!(),
     ;
-    ".github/workflows/nix.yml",
+    GITHUB_CI!(),
 }
 
 #[derive(StructOpt, Debug)]
@@ -172,10 +189,10 @@ fn main() {
     let tera = {
         let mut tera = Tera::default();
         tera.add_raw_templates(vec![
-            (BUILD_NIX, get_string!(BUILD_NIX)),
-            (FLAKE_NIX, get_string!(FLAKE_NIX)),
-            (COMMON_NIX, get_string!(COMMON_NIX)),
-            (GITHUB_CI, get_string!(GITHUB_CI)),
+            (BUILD!(), get_string!(BUILD!())),
+            (FLAKE!(), get_string!(FLAKE!())),
+            (COMMON!(), get_string!(COMMON!())),
+            (GITHUB_CI!(), get_string!(GITHUB_CI!())),
         ])
         .unwrap();
         tera
@@ -187,17 +204,17 @@ fn main() {
     let out_dir = options.out_dir;
 
     println!("⚡ Rendering files...");
-    let build_nix = tera.render(BUILD_NIX, &context).unwrap();
-    let flake_nix = tera.render(FLAKE_NIX, &context).unwrap();
-    let common_nix = tera.render(COMMON_NIX, &context).unwrap();
-    let github_ci = tera.render(GITHUB_CI, &context).unwrap();
+    let build_nix = tera.render(BUILD!(), &context).unwrap();
+    let flake_nix = tera.render(FLAKE!(), &context).unwrap();
+    let common_nix = tera.render(COMMON!(), &context).unwrap();
+    let github_ci = tera.render(GITHUB_CI!(), &context).unwrap();
 
     println!("💾 Writing rendered files...");
     let rendered_files = vec![
-        (BUILD_NIX, build_nix),
-        (FLAKE_NIX, flake_nix),
-        (COMMON_NIX, common_nix),
-        (GITHUB_CI, github_ci),
+        (BUILD!(), build_nix),
+        (FLAKE!(), flake_nix),
+        (COMMON!(), common_nix),
+        (GITHUB_CI!(), github_ci),
     ];
     write_files(out_dir.as_path(), rendered_files, options.ci);
 
@@ -245,10 +262,10 @@ fn write_files(
             CiType::Github => {
                 let pos = rendered_files
                     .iter()
-                    .position(|(name, _)| name == &GITHUB_CI)
+                    .position(|(name, _)| name == &GITHUB_CI!())
                     .unwrap();
                 let github_ci = rendered_files.remove(pos).1;
-                let path = out_dir.join(GITHUB_CI);
+                let path = out_dir.join(GITHUB_CI!());
 
                 fs::create_dir_all(path.parent().unwrap()).unwrap();
                 fs::write(path, github_ci).unwrap();
@@ -270,25 +287,17 @@ fn build_context_from_opts(options: &Options) -> Context {
     let mut context = Context::new();
 
     // Essential variables
-    if options.package_name.is_empty() {
-        println!("Error: package name can't be empty. Aborting.");
-        std::process::exit(1);
-    }
     context.insert("package_name", &options.package_name);
-    if options.package_license.is_empty() {
-        println!("Error: package license can't be empty. Aborting.");
-        std::process::exit(1);
-    }
+    context.insert(
+        "package_executable",
+        options
+            .package_executable
+            .as_deref()
+            .unwrap_or(&options.package_name),
+    );
     context.insert("package_license", &options.package_license);
     if let Some(systems) = options.package_systems.as_deref() {
-        // Handle empty package systems (this can't happen (?) but we handle it anyways)
-        if systems.is_empty() {
-            println!(
-                "Error: you must specify at least one system for `package_systems`. Aborting."
-            );
-            std::process::exit(1);
-        }
-        context.insert("package_systems", &options.package_systems);
+        context.insert("package_systems", systems);
     }
     context.insert("rust_toolchain_file", &options.rust_toolchain_file);
     context.insert(
@@ -309,9 +318,6 @@ fn build_context_from_opts(options: &Options) -> Context {
     context.insert("make_desktop_file", &options.make_desktop_file);
     if let Some(icon) = options.package_icon.as_deref() {
         context.insert("package_icon", icon);
-    }
-    if let Some(exec) = options.package_executable.as_deref() {
-        context.insert("package_executable", exec);
     }
     if let Some(comment) = options.package_xdg_comment.as_deref() {
         context.insert("package_xdg_comment", comment);
