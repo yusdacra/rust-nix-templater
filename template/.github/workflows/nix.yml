@@ -29,5 +29,5 @@ jobs:
     {% endif %}
     - name: Build
       run: nix build .#{{ package_name }}-debug -L --show-trace
-    - name: Test simple
-      run: nix run .#{{ package_name }}-debug
+    - name: Tests
+      run: nix build .#{{ package_name }}-tests -L --show-trace
