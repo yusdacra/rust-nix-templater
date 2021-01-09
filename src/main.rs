@@ -47,6 +47,7 @@ include_template_files! {
     GITHUB_CI!(),
 }
 
+/// Generates Nix files for Rust applications which uses naersk.
 #[derive(StructOpt, Debug)]
 #[structopt(name = "rust-nix-templater")]
 struct Options {
@@ -57,7 +58,7 @@ struct Options {
     #[structopt(short, long)]
     ci: Vec<CiType>,
 
-    /// The output dir where rendered files will be put in.
+    /// Output dir where rendered files will be put in. [example: -o .]
     #[structopt(short, long, default_value = "out")]
     out_dir: PathBuf,
 
@@ -67,8 +68,7 @@ struct Options {
     /// License of the package. Can be any of the values listed in https://github.com/NixOS/nixpkgs/blob/master/lib/licenses.nix. [example: -l mit]
     #[structopt(short = "l", long = "license")]
     package_license: String,
-    /// Systems that the package is supported on. [example: -s x86_64-linux x86_64-darwin]
-    /// Defaults to nixpkgs's default systems.
+    /// Systems that the package is supported on. [example: -s x86_64-linux x86_64-darwin] [default: nixpkgs default systems]
     #[structopt(short = "s", long = "systems")]
     package_systems: Option<Vec<String>>,
 
@@ -90,7 +90,7 @@ struct Options {
     /// Icon to use in the generated desktop file. [example: --icon assets/icon.ico]
     #[structopt(long = "icon")]
     package_icon: Option<String>,
-    /// Comment to put in the generated desktop file. Defaults to package description.
+    /// Comment to put in the generated desktop file. [default: package description]
     #[structopt(long = "xdg-comment")]
     package_xdg_comment: Option<String>,
     /// Desktop name to put in the generated desktop file. Defaults to package name. [example: --xdg-desktop-name "Icy Matrix"]
@@ -110,10 +110,10 @@ struct Options {
     #[structopt(short = "t", long = "toolchain", default_value = "stable")]
     rust_toolchain_channel: RustToolchainChannel,
 
-    /// Cachix cache name.
+    /// Cachix cache name. [example: --cachix-name rust-nix-templater]
     #[structopt(long)]
     cachix_name: Option<String>,
-    /// Cachix cache public key.
+    /// Cachix cache public key. [example: --cachix-public-key "rust-nix-templater.cachix.org-1:Tmy1V0KK+nxzg0XFePL/++t4JRKAw5tvr+FNfHz7mIY=""]
     #[structopt(long)]
     cachix_public_key: Option<String>,
 }
