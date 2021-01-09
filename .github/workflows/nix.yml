@@ -29,3 +29,6 @@ jobs:
         nix run .#rust-nix-templater-debug -- -n test -l mit
         nix run .#rust-nix-templater-debug -- -n test -l mit --mk-desktop-file
         nix run .#rust-nix-templater-debug -- -n test -l mit --ci github
+        nix run .#rust-nix-templater-debug -- -n test -l mit --cachix-name test --cachix-public-key test
+        nix run .#rust-nix-templater-debug -- -n test -l mit --cachix-name test --cachix-public-key test --ci github
+        nix run .#rust-nix-templater-debug -- -n test -l mit --cachix-name test --cachix-public-key test --ci github --mk-desktop-file
