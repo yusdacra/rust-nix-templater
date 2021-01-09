@@ -2,6 +2,8 @@
 #![allow(clippy::non_ascii_literal)]
 
 mod options;
+#[cfg(test)]
+mod tests;
 
 use options::{CiType, Options};
 use structopt::StructOpt;
@@ -33,6 +35,11 @@ include_template_files! {
 }
 
 fn main() {
+    let options = Options::from_args();
+    run_with_options(options);
+}
+
+pub(crate) fn run_with_options(options: Options) {
     let tera = {
         let mut tera = Tera::default();
         tera.add_raw_templates(vec![
@@ -46,7 +53,6 @@ fn main() {
         tera
     };
 
-    let options = Options::from_args();
     let context = build_context_from_opts(&options);
 
     let out_dir = options.out_dir;
@@ -184,9 +190,10 @@ fn build_context_from_opts(options: &Options) -> Context {
 
     if let Some(cachix_name) = options.cachix_name.as_deref() {
         context.insert("cachix_name", cachix_name);
-        if let Some(cachix_public_key) = options.cachix_public_key.as_deref() {
-            context.insert("cachix_public_key", cachix_public_key);
-        }
+        context.insert(
+            "cachix_public_key",
+            options.cachix_public_key.as_deref().unwrap(),
+        );
     }
 
     context

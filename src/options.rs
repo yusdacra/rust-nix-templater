@@ -7,7 +7,7 @@ use std::{
 use structopt::StructOpt;
 
 /// Generates Nix files for Rust applications which uses naersk.
-#[derive(StructOpt, Debug)]
+#[derive(StructOpt, Debug, Default)]
 #[structopt(name = "rust-nix-templater")]
 pub(crate) struct Options {
     /// Create a desktop file.
@@ -127,6 +127,12 @@ pub(crate) enum RustToolchainChannel {
     Stable,
     Beta,
     Nightly,
+}
+
+impl Default for RustToolchainChannel {
+    fn default() -> Self {
+        Self::Stable
+    }
 }
 
 impl FromStr for RustToolchainChannel {

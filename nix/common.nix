@@ -6,7 +6,6 @@ let
   rustChannel =
     let
       channel = mozPkgs.rustChannelOf {
-        date = "2020-12-31";
         channel = "stable";
         sha256 = "sha256-KCh2UBGtdlBJ/4UOqZlxUtcyefv7MH1neoVNV4z0nWs=";
       };
@@ -21,7 +20,8 @@ rec {
     overlays = [
       (final: prev: {
         rustc = rustChannel.rust;
-        inherit (rustChannel);
+        clippy = rustChannel.clippy-preview;
+        rustfmt = rustChannel.rustfmt-preview;
       })
       (final: prev: {
         naersk = prev.callPackage sources.naersk { };
