@@ -31,6 +31,7 @@ let
     root = ../.;
     nativeBuildInputs = crateDeps.nativeBuildInputs;
     buildInputs = crateDeps.buildInputs;
+    override = (prev: env);
     overrideMain = (prev: {
       inherit meta;
       {% if make_desktop_file %}
@@ -38,7 +39,6 @@ let
       desktopItems = [ desktopFile ];
       {% endif %}
     });
-    inherit (env);
     inherit release doCheck doDoc;
   };
 in
