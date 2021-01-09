@@ -17,6 +17,14 @@ jobs:
         install_url: https://github.com/numtide/nix-flakes-installer/releases/download/nix-2.4pre20201221_9fab14a/install
         extra_nix_config: |
           experimental-features = nix-command flakes
+        nix_path: nixpkgs=channel:nixos-unstable
+    - uses: cachix/cachix-action@v8
+      with:
+        name: rust-nix-templater
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - run: nix build -L --show-trace
-    - name: Test simple
-      run: nix run .#rust-nix-templater-debug -- -n test -l mit
+    - name: Tests
+      run: |
+        nix run .#rust-nix-templater-debug -- -n test -l mit
+        nix run .#rust-nix-templater-debug -- -n test -l mit --mk-desktop-file
+        nix run .#rust-nix-templater-debug -- -n test -l mit --ci github
