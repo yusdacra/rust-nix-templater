@@ -1,21 +1,20 @@
 { sources, system }:
 let
-  pkgs = import sources.nixpkgs { inherit system; };
-  mozPkgs = import "${sources.nixpkgsMoz}/package-set.nix" { inherit pkgs; };
+  pkgz = import sources.nixpkgs { inherit system; };
+  mozPkgs = import "${sources.nixpkgsMoz}/package-set.nix" { inherit pkgz; };
 
   rustChannel =
     let
       channel = mozPkgs.rustChannelOf {
         {% if rust_toolchain_file %} rustToolchain = "../rust-toolchain"; {% else %} channel = "{{ rust_toolchain_channel }}"; {% endif %}
         # Replace this with the expected hash that Nix will output when trying to build the package.
-        sha256 = pkgs.lib.fakeHash;
+        sha256 = pkgz.lib.fakeHash;
       };
     in
     channel // {
       rust = channel.rust.override { extensions = [ "rust-src" "rustfmt-preview" "clippy-preview" ]; };
     };
-in
-rec {
+
   pkgs = import sources.nixpkgs {
     inherit system;
     overlays = [
@@ -28,6 +27,9 @@ rec {
       })
     ];
   };
+in
+{
+  inherit pkgs;
 
   /* You might need this if your application utilizes a GUI. Note that the dependencies
     might change from application to application. The example dependencies provided here

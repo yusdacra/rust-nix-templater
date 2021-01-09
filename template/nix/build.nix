@@ -1,4 +1,6 @@
-{ release ? true
+{ release ? false
+, doCheck ? false
+, doDoc ? false
 , common
 ,
 }:
@@ -12,8 +14,10 @@ let
   };
 
   {% if make_desktop_file %}
-  desktopFile = pkgs.makeDesktopItem rec {
+  desktopFile = let
     name = "{{ package_name }}";
+  in pkgs.makeDesktopItem {
+    inherit name;
     exec = "{{ package_executable }}";
     comment = {% if package_xdg_comment %} "{{ package_xdg_comment }}" {% else %} meta.description {% endif %};
     desktopName = {% if package_xdg_desktop_name %} "{{ package_xdg_desktop_name }}" {% else %} name {% endif %};
@@ -27,14 +31,14 @@ let
     root = ../.;
     nativeBuildInputs = crateDeps.nativeBuildInputs;
     buildInputs = crateDeps.buildInputs;
-    overrideMain = (prev: rec {
+    overrideMain = (prev: {
       inherit meta;
       {% if make_desktop_file %}
       nativeBuildInputs = prev.nativeBuildInputs ++ [ copyDesktopItems wrapGAppsHook ];
       desktopItems = [ desktopFile ];
       {% endif %}
     });
-    inherit release;
+    inherit release doCheck doDoc;
   };
 in
 package

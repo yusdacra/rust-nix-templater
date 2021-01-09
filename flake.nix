@@ -25,8 +25,9 @@
       in
       rec {
         packages = {
-          rust-nix-templater = import ./nix/build.nix { inherit common; };
-          rust-nix-templater-debug = import ./nix/build.nix { inherit common; release = false; };
+          rust-nix-templater = import ./nix/build.nix { inherit common; release = true; doCheck = true; };
+          rust-nix-templater-debug = import ./nix/build.nix { inherit common; };
+          rust-nix-templater-tests = import ./nix/build.nix { inherit common; doCheck = true; };
         };
         defaultPackage = packages.rust-nix-templater;
 

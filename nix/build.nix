@@ -1,4 +1,5 @@
-{ release ? true
+{ release ? false
+, doCheck ? false
 , common
 ,
 }:
@@ -14,10 +15,10 @@ let
     root = ../.;
     nativeBuildInputs = crateDeps.nativeBuildInputs;
     buildInputs = crateDeps.buildInputs;
-    overrideMain = (prev: {
+    overrideMain = (_: {
       inherit meta;
     });
-    inherit release;
+    inherit release doCheck;
   };
 in
 package

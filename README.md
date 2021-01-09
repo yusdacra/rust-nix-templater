@@ -3,7 +3,7 @@ Generates Nix files for Rust applications which uses [naersk](https://github.com
 
 ## Features
 - Support for both flakes and legacy nix
-- Generates release and debug packages
+- Generates release, debug and test packages
 - Cachix support
 - Generates development shell
 - Desktop file generation
