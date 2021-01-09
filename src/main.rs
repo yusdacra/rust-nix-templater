@@ -15,6 +15,7 @@ macro_str! {
     BUILD, "nix/build.nix";
     FLAKE, "flake.nix";
     COMMON, "nix/common.nix";
+    DEV, "nix/devShell.nix";
 }
 
 #[macro_export]
@@ -34,7 +35,7 @@ macro_rules! macro_str {
 
 include_template_files! {
     "nix/default.nix",
-    "nix/devShell.nix",
+    DEV!(),
     "nix/shell.nix",
     "nix/envrc",
     ".gitignore",
@@ -108,6 +109,13 @@ struct Options {
     /// Rust toolchain channel to use. [example: -t nightly]
     #[structopt(short = "t", long = "toolchain", default_value = "stable")]
     rust_toolchain_channel: RustToolchainChannel,
+
+    /// Cachix cache name.
+    #[structopt(long)]
+    cachix_name: Option<String>,
+    /// Cachix cache public key.
+    #[structopt(long)]
+    cachix_public_key: Option<String>,
 }
 
 #[derive(Debug)]
@@ -193,6 +201,7 @@ fn main() {
             (FLAKE!(), get_string!(FLAKE!())),
             (COMMON!(), get_string!(COMMON!())),
             (GITHUB_CI!(), get_string!(GITHUB_CI!())),
+            (DEV!(), get_string!(DEV!())),
         ])
         .unwrap();
         tera
@@ -208,6 +217,7 @@ fn main() {
     let flake_nix = tera.render(FLAKE!(), &context).unwrap();
     let common_nix = tera.render(COMMON!(), &context).unwrap();
     let github_ci = tera.render(GITHUB_CI!(), &context).unwrap();
+    let dev = tera.render(DEV!(), &context).unwrap();
 
     println!("💾 Writing rendered files...");
     let rendered_files = vec![
@@ -215,6 +225,7 @@ fn main() {
         (FLAKE!(), flake_nix),
         (COMMON!(), common_nix),
         (GITHUB_CI!(), github_ci),
+        (DEV!(), dev),
     ];
     write_files(out_dir.as_path(), rendered_files, options.ci);
 
@@ -316,20 +327,29 @@ fn build_context_from_opts(options: &Options) -> Context {
     }
 
     context.insert("make_desktop_file", &options.make_desktop_file);
-    if let Some(icon) = options.package_icon.as_deref() {
-        context.insert("package_icon", icon);
+    if options.make_desktop_file {
+        if let Some(icon) = options.package_icon.as_deref() {
+            context.insert("package_icon", icon);
+        }
+        if let Some(comment) = options.package_xdg_comment.as_deref() {
+            context.insert("package_xdg_comment", comment);
+        }
+        if let Some(name) = options.package_xdg_desktop_name.as_deref() {
+            context.insert("package_xdg_desktop_name", name);
+        }
+        if let Some(name) = options.package_xdg_generic_name.as_deref() {
+            context.insert("package_xdg_generic_name", name);
+        }
+        if let Some(categories) = options.package_xdg_categories.as_deref() {
+            context.insert("package_xdg_categories", categories);
+        }
     }
-    if let Some(comment) = options.package_xdg_comment.as_deref() {
-        context.insert("package_xdg_comment", comment);
-    }
-    if let Some(name) = options.package_xdg_desktop_name.as_deref() {
-        context.insert("package_xdg_desktop_name", name);
-    }
-    if let Some(name) = options.package_xdg_generic_name.as_deref() {
-        context.insert("package_xdg_generic_name", name);
-    }
-    if let Some(categories) = options.package_xdg_categories.as_deref() {
-        context.insert("package_xdg_categories", categories);
+
+    if let Some(cachix_name) = options.cachix_name.as_deref() {
+        context.insert("cachix_name", cachix_name);
+        if let Some(cachix_public_key) = options.cachix_public_key.as_deref() {
+            context.insert("cachix_public_key", cachix_public_key);
+        }
     }
 
     context

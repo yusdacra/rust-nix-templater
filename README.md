@@ -15,6 +15,8 @@ FLAGS:
     -V, --version               Prints version information
 
 OPTIONS:
+        --cachix-name <cachix-name>                      Cachix cache name
+        --cachix-public-key <cachix-public-key>          Cachix cache public key
     -c, --ci <ci>...                                     Which CI systems to create CI files for. [example: -c github]
     -o, --out-dir <out-dir>
             The output dir where rendered files will be put in [default: out]
