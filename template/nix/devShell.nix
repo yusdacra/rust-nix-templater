@@ -2,7 +2,7 @@
 with common; with pkgs;
 mkShell {
   nativeBuildInputs =
-    [ git nixpkgs-fmt cargo rustc {% if cachix_name %} cachix {% endif %} ]
+    [ git nixpkgs-fmt cargo rustc clippy rustfmt {% if cachix_name %} cachix {% endif %} ]
     ++ crateDeps.nativeBuildInputs;
   buildInputs = crateDeps.buildInputs;
   shellHook = let

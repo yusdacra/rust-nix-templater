@@ -20,7 +20,8 @@ let
     overlays = [
       (final: prev: {
         rustc = rustChannel.rust;
-        inherit (rustChannel);
+        clippy = rustChannel.clippy-preview;
+        rustfmt = rustChannel.rustfmt-preview;
       })
       (final: prev: {
         naersk = prev.callPackage sources.naersk { };
