@@ -10,8 +10,8 @@ Generates Nix files for Rust applications which uses [naersk](https://github.com
 - CI file generation (currently only for GitHub Actions)
 
 ## Installation
-- Flakes: `nix profile install https://github.com/yusdacra/rust-nix-templater.git`
-- Legacy: `nix-env -i https://github.com/yusdacra/rust-nix-templater/archive/master.tar.gz`
+- Flakes: `nix profile install "https://github.com/yusdacra/rust-nix-templater.git"`
+- Legacy: `nix-env -i -f "https://github.com/yusdacra/rust-nix-templater/tarball/master"`
 
 ## Usage
 ```
