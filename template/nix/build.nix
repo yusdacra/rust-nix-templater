@@ -38,6 +38,7 @@ let
       desktopItems = [ desktopFile ];
       {% endif %}
     });
+    inherit (env);
     inherit release doCheck doDoc;
   };
 in

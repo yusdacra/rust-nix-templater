@@ -38,7 +38,8 @@ in
     For example, it might look like this:
 
     neededLibs = with pkgs; (with xorg; [ libX11 libXcursor libXrandr libXi ])
-    ++ [ vulkan-loader wayland wayland-protocols libxkbcommon ]; */
+    ++ [ vulkan-loader wayland wayland-protocols libxkbcommon ];
+  */
   neededLibs = [ ];
 
   # Dependencies listed here will be passed to Nix build and development shell
@@ -48,4 +49,15 @@ in
       buildInputs = [ /* Add runtime dependencies here */ ];
       nativeBuildInputs = [ /* Add compile time dependencies here */ ];
     };
+  
+  /* Put env variables here, like so:
+
+    env = {
+      PROTOC = "${pkgs.protobuf}/bin/protoc";
+    };
+
+    The variables are not (shell) escaped.
+    Variables put here will appear in both dev env and build env.
+  */
+  env = { };
 }
