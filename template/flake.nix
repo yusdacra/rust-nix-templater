@@ -1,12 +1,8 @@
 {
   description = "Flake for {{ package_name }}";
 
-  inputs = let
-    nixpkgs = {
-      url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    };
-  in {
-    inherit nixpkgs;
+  inputs = rec {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     naersk = {
       url = "github:nmattia/naersk";
       inputs.nixpkgs = nixpkgs;

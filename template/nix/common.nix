@@ -1,7 +1,7 @@
 { sources, system }:
 let
   pkgz = import sources.nixpkgs { inherit system; };
-  mozPkgs = import "${sources.nixpkgsMoz}/package-set.nix" { inherit pkgz; };
+  mozPkgs = import "${sources.nixpkgsMoz}/package-set.nix" { pkgs = pkgz; };
 
   rustChannel =
     let
