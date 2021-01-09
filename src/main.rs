@@ -1,13 +1,13 @@
 #![warn(clippy::pedantic)]
 #![allow(clippy::non_ascii_literal)]
 
-use std::{
-    fmt::{self, Display, Formatter},
-    path::PathBuf,
-    str::FromStr,
-};
+mod options;
 
+use options::{CiType, Options};
 use structopt::StructOpt;
+
+use std::process::Output;
+
 use tera::{Context, Tera};
 
 macro_str! {
@@ -16,21 +16,6 @@ macro_str! {
     FLAKE, "flake.nix";
     COMMON, "nix/common.nix";
     DEV, "nix/devShell.nix";
-}
-
-#[macro_export]
-macro_rules! macro_str {
-    {
-        $( $name:ident, $str:expr; )*
-    } => {
-        $(
-            macro_rules! $name {
-                () => {
-                    $str
-                };
-            }
-        )*
-    };
 }
 
 include_template_files! {
@@ -45,152 +30,6 @@ include_template_files! {
     GITHUB_CI!(),
     ;
     GITHUB_CI!(),
-}
-
-/// Generates Nix files for Rust applications which uses naersk.
-#[derive(StructOpt, Debug)]
-#[structopt(name = "rust-nix-templater")]
-struct Options {
-    /// Create a desktop file.
-    #[structopt(short = "M", long = "mk-desktop-file")]
-    make_desktop_file: bool,
-    /// Which CI systems to create CI files for. [example: -c github]
-    #[structopt(short, long)]
-    ci: Vec<CiType>,
-
-    /// Output dir where rendered files will be put in. [example: -o .]
-    #[structopt(short, long, default_value = "out")]
-    out_dir: PathBuf,
-
-    /// Name of the package. [example: -n icy_matrix]
-    #[structopt(short = "n", long = "name")]
-    package_name: String,
-    /// License of the package. Can be any of the values listed in https://github.com/NixOS/nixpkgs/blob/master/lib/licenses.nix. [example: -l mit]
-    #[structopt(short = "l", long = "license")]
-    package_license: String,
-    /// Systems that the package is supported on. [example: -s x86_64-linux x86_64-darwin] [default: nixpkgs default systems]
-    #[structopt(short = "s", long = "systems")]
-    package_systems: Option<Vec<String>>,
-
-    /// A short, single line description of the package.
-    #[structopt(short = "d", long = "description")]
-    package_description: Option<String>,
-    /// A longer description of the package.
-    #[structopt(short = "D", long = "long-description")]
-    package_long_description: Option<String>,
-    /// Homepage of the package. [example: -h "https://gitlab.com/example/example"]
-    #[structopt(short = "h", long = "homepage")]
-    package_homepage: Option<String>,
-
-    /// Name of the executable `cargo build` generates.
-    /// Required if your package's executable name is different from your package's name.
-    #[structopt(short = "e", long = "executable")]
-    package_executable: Option<String>,
-
-    /// Icon to use in the generated desktop file. [example: --icon assets/icon.ico]
-    #[structopt(long = "icon")]
-    package_icon: Option<String>,
-    /// Comment to put in the generated desktop file. [default: package description]
-    #[structopt(long = "xdg-comment")]
-    package_xdg_comment: Option<String>,
-    /// Desktop name to put in the generated desktop file. Defaults to package name. [example: --xdg-desktop-name "Icy Matrix"]
-    #[structopt(long = "xdg-desktop-name")]
-    package_xdg_desktop_name: Option<String>,
-    /// Generic name to put in the generated desktop file. [example: --xdg-generic-name "Matrix Client"]
-    #[structopt(long = "xdg-generic-name")]
-    package_xdg_generic_name: Option<String>,
-    /// Categories to put in the generated desktop file. [example: --xdg-categories Network InstantMessaging]
-    #[structopt(long = "xdg-categories")]
-    package_xdg_categories: Option<Vec<String>>,
-
-    /// Use the `rust-toolchain` file instead of a channel.
-    #[structopt(short = "T", long = "use-toolchain-file")]
-    rust_toolchain_file: bool,
-    /// Rust toolchain channel to use. [example: -t nightly]
-    #[structopt(short = "t", long = "toolchain", default_value = "stable")]
-    rust_toolchain_channel: RustToolchainChannel,
-
-    /// Cachix cache name. [example: --cachix-name rust-nix-templater]
-    #[structopt(long)]
-    cachix_name: Option<String>,
-    /// Cachix cache public key. [example: --cachix-public-key "rust-nix-templater.cachix.org-1:Tmy1V0KK+nxzg0XFePL/++t4JRKAw5tvr+FNfHz7mIY=""]
-    #[structopt(long)]
-    cachix_public_key: Option<String>,
-}
-
-#[derive(Debug)]
-enum CiTypeParseError {
-    NotFound,
-}
-
-impl Display for CiTypeParseError {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match self {
-            Self::NotFound => write!(
-                f,
-                "No such CI system supported. Supported CI systems are 'github'."
-            ),
-        }
-    }
-}
-
-#[derive(Debug)]
-enum CiType {
-    Github,
-}
-
-impl FromStr for CiType {
-    type Err = CiTypeParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_ascii_lowercase().trim() {
-            "github" => Ok(Self::Github),
-            _ => Err(Self::Err::NotFound),
-        }
-    }
-}
-
-#[derive(Debug)]
-enum RustToolchainChannelParseError {
-    Invalid,
-}
-
-impl Display for RustToolchainChannelParseError {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match self {
-            Self::Invalid => write!(f, "Invalid channel name specified. Valid channels are 'stable', 'beta' and 'nightly'."),
-        }
-    }
-}
-
-#[derive(Debug)]
-enum RustToolchainChannel {
-    Stable,
-    Beta,
-    Nightly,
-}
-
-impl FromStr for RustToolchainChannel {
-    type Err = RustToolchainChannelParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_ascii_lowercase().trim() {
-            "stable" => Ok(Self::Stable),
-            "beta" => Ok(Self::Beta),
-            "nightly" => Ok(Self::Nightly),
-            _ => Err(Self::Err::Invalid),
-        }
-    }
-}
-
-impl Display for RustToolchainChannel {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match self {
-            Self::Stable => write!(f, "stable"),
-            Self::Beta => write!(f, "beta"),
-            Self::Nightly => write!(f, "nightly"),
-        }
-    }
 }
 
 fn main() {
@@ -230,21 +69,19 @@ fn main() {
     write_files(out_dir.as_path(), rendered_files, options.ci);
 
     println!("  - Formatting files...");
-    try_fmt(out_dir.as_path());
-
-    println!("🎉 Finished!");
-}
-
-fn try_fmt(out_dir: &std::path::Path) {
-    if std::process::Command::new("nixpkgs-fmt")
-        .arg(out_dir)
-        .output()
-        .is_ok()
-    {
+    if fmt(out_dir.as_path()).is_ok() {
         println!("  - Format successful!");
     } else {
         println!("  - Failed to format: do you have `nixpkgs-fmt` installed and in your $PATH?");
     }
+
+    println!("🎉 Finished!");
+}
+
+fn fmt(out_dir: &std::path::Path) -> std::io::Result<Output> {
+    std::process::Command::new("nixpkgs-fmt")
+        .arg(out_dir)
+        .output()
 }
 
 fn write_files(
@@ -384,5 +221,20 @@ macro_rules! include_template_files {
                 $fopt,
             )*
         ];
+    };
+}
+
+#[macro_export]
+macro_rules! macro_str {
+    {
+        $( $name:ident, $str:expr; )*
+    } => {
+        $(
+            macro_rules! $name {
+                () => {
+                    $str
+                };
+            }
+        )*
     };
 }
