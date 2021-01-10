@@ -22,8 +22,7 @@
           sources = { inherit naersk nixpkgs nixpkgsMoz; };
           inherit system;
         };
-      in
-      rec {
+
         packages = {
           # Compiles slower but has tests and faster executable
           "{{ package_name }}" = import ./nix/build.nix {
@@ -36,10 +35,14 @@
           # Compiles faster but has tests and slower executable
           "{{ package_name }}-tests" = import ./nix/build.nix { inherit common; doCheck = true; };
         };
+        apps = builtins.mapAttrs (n: v: mkApp { name = n; drv = v; exePath = "/bin/{{ package_executable }}"; }) packages;
+      in
+      {
+        inherit packages apps;
+
         # Release build is the default package
         defaultPackage = packages."{{ package_name }}";
 
-        apps = builtins.mapAttrs (n: v: mkApp { name = n; drv = v; exePath = "/bin/{{ package_executable }}"; }) packages;
         # Release build is the default app
         defaultApp = apps."{{ package_name }}";
 
