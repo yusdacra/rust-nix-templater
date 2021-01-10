@@ -39,6 +39,7 @@ let
       desktopItems = [ desktopFile ];
       {% endif %}
     });
+    {% if package_lib %} copyLibs = true; {% endif %}
     inherit release doCheck doDoc;
   };
 in

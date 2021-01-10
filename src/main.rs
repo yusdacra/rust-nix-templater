@@ -149,6 +149,7 @@ fn build_context_from_opts(options: &Options) -> Context {
             .as_deref()
             .unwrap_or(&options.package_name),
     );
+    context.insert("package_lib", &options.package_lib);
     context.insert("package_license", &options.package_license);
     if let Some(systems) = options.package_systems.as_deref() {
         context.insert("package_systems", systems);
@@ -169,8 +170,9 @@ fn build_context_from_opts(options: &Options) -> Context {
         context.insert("package_homepage", homepage);
     }
 
-    context.insert("make_desktop_file", &options.make_desktop_file);
-    if options.make_desktop_file {
+    let mk_desktop_file = options.make_desktop_file && !options.package_lib;
+    context.insert("make_desktop_file", &mk_desktop_file);
+    if mk_desktop_file {
         if let Some(icon) = options.package_icon.as_deref() {
             context.insert("package_icon", icon);
         }

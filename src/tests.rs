@@ -84,3 +84,14 @@ make_test! {
     wrong_ci_name;
     ci: vec![CiType::from_str("invalid ci tpye").unwrap()],
 }
+
+make_test! {
+    lib_package;
+    package_lib: true,
+}
+
+make_test! {
+    lib_package_desktop;
+    package_lib: true,
+    make_desktop_file: true,
+}

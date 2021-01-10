@@ -6,7 +6,7 @@ use std::{
 
 use structopt::StructOpt;
 
-/// Generates Nix files for Rust applications which uses naersk.
+/// Generates Nix files for Rust projects which uses naersk.
 #[derive(StructOpt, Debug, Default)]
 #[structopt(name = "rust-nix-templater")]
 pub(crate) struct Options {
@@ -41,6 +41,9 @@ pub(crate) struct Options {
     #[structopt(short = "h", long = "homepage")]
     pub(crate) package_homepage: Option<String>,
 
+    /// Create a library package instead of a binary package.
+    #[structopt(short = "L", long = "library")]
+    pub(crate) package_lib: bool,
     /// Name of the executable `cargo build` generates.
     /// Required if your package's executable name is different from your package's name.
     #[structopt(short = "e", long = "executable")]
