@@ -3,6 +3,15 @@ let
   pkgz = import sources.nixpkgs { inherit system; };
   mozPkgs = import "${sources.nixpkgsMoz}/package-set.nix" { pkgs = pkgz; };
 
+  rustNightlyChannel =
+    mozPkgs.rustChannelOf {
+      # It's highly recommended to pin this to a certain date like so:
+      # date = "2021-01-08";
+      channel = "nightly";
+      # Replace this with the expected hash that Nix will output when trying to build the package.
+      sha256 = pkgz.lib.fakeHash;
+    };
+
   rustChannel =
     let
       channel = mozPkgs.rustChannelOf {
@@ -20,8 +29,7 @@ let
     overlays = [
       (final: prev: {
         rustc = rustChannel.rust;
-        clippy = rustChannel.clippy-preview;
-        rustfmt = rustChannel.rustfmt-preview;
+        inherit (rustNightlyChannel) cargo;
       })
       (final: prev: {
         naersk = prev.callPackage sources.naersk { };
