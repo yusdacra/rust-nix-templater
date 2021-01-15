@@ -18,10 +18,9 @@ rec {
   pkgs = import sources.nixpkgs {
     inherit system;
     overlays = [
+      sources.devshell.overlay
       (final: prev: {
         rustc = rustChannel.rust;
-        clippy = rustChannel.clippy-preview;
-        rustfmt = rustChannel.rustfmt-preview;
       })
       (final: prev: {
         naersk = prev.callPackage sources.naersk { };

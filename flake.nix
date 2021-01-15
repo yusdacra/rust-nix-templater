@@ -8,6 +8,7 @@
     };
     flakeUtils.url = "github:numtide/flake-utils";
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    devshell.url = "github:numtide/devshell";
     nixpkgsMoz = {
       url = "github:mozilla/nixpkgs-mozilla";
       flake = false;
@@ -19,7 +20,7 @@
     eachSystem defaultSystems (system:
       let
         common = import ./nix/common.nix {
-          sources = { inherit naersk nixpkgs nixpkgsMoz; };
+          sources = { inherit devshell naersk nixpkgs nixpkgsMoz; };
           inherit system;
         };
       in
