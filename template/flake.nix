@@ -1,11 +1,11 @@
 {
   description = "Flake for {{ package_name }}";
 
-  inputs = rec {
+  inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     naersk = {
       url = "github:nmattia/naersk";
-      inputs.nixpkgs = nixpkgs;
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     flakeUtils.url = "github:numtide/flake-utils";
     nixpkgsMoz = {

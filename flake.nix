@@ -1,10 +1,10 @@
 {
   description = "Flake for rust-nix-templater";
 
-  inputs = rec {
+  inputs = {
     naersk = {
       url = "github:nmattia/naersk";
-      inputs.nixpkgs = nixpkgs;
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     flakeUtils.url = "github:numtide/flake-utils";
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
