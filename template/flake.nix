@@ -2,6 +2,7 @@
   description = "Flake for {{ package_name }}";
 
   inputs = {
+    devshell.url = "github:numtide/devshell";
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     naersk = {
       url = "github:nmattia/naersk";
@@ -19,7 +20,7 @@
     eachSystem {% if package_systems %} [ {% for system in package_systems %} "{{ system }}" {% endfor %} ] {% else %} defaultSystems {% endif %} (system:
       let
         common = import ./nix/common.nix {
-          sources = { inherit naersk nixpkgs nixpkgsMoz; };
+          sources = { inherit devshell naersk nixpkgs nixpkgsMoz; };
           inherit system;
         };
 
