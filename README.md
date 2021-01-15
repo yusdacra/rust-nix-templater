@@ -11,7 +11,7 @@ Generates Nix files for Rust projects which uses [naersk](https://github.com/nma
 - CI file generation (currently only for GitHub Actions)
 
 ## Installation
-- Flakes: `nix profile install "https://github.com/yusdacra/rust-nix-templater.git"`
+- Flakes: `nix profile install github:yusdacra/rust-nix-templater`
 - Legacy: `nix-env -i -f "https://github.com/yusdacra/rust-nix-templater/tarball/master"`
 
 ## Usage
