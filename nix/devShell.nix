@@ -1,6 +1,6 @@
 { common }:
 with common; with pkgs;
-mkDevShell {
+devshell.mkShell {
   packages =
     [ git nixpkgs-fmt rustc cachix ]
     ++ crateDeps.nativeBuildInputs ++ crateDeps.buildInputs;
