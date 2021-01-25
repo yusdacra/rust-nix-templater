@@ -31,6 +31,8 @@ let
     root = ../.;
     nativeBuildInputs = crateDeps.nativeBuildInputs;
     buildInputs = crateDeps.buildInputs;
+    # WORKAROUND because doctests fail to compile (they compile with nightly cargo but then rustdoc fails)
+    cargoTestOptions = def: def ++ [ "--lib" "--tests" "--bins" "--examples" ];
     override = (prev: env);
     overrideMain = (prev: {
       inherit meta;
