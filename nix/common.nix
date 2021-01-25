@@ -1,32 +1,26 @@
 { sources, system }:
 let
-  pkgs = import sources.nixpkgs { inherit system; };
-  mozPkgs = import "${sources.nixpkgsMoz}/package-set.nix" { inherit pkgs; };
+  pkgz = import sources.nixpkgs { inherit system; overlays = [ sources.rustOverlay.overlay ]; };
+  rustChannel = pkgz.rust-bin.stable.latest.rust.override {
+    extensions = [ "rust-src" ];
+  };
 
-  rustChannel =
-    let
-      channel = mozPkgs.rustChannelOf {
-        channel = "stable";
-        sha256 = "sha256-KCh2UBGtdlBJ/4UOqZlxUtcyefv7MH1neoVNV4z0nWs=";
-      };
-    in
-    channel // {
-      rust = channel.rust.override { extensions = [ "rust-src" "rustfmt-preview" "clippy-preview" ]; };
-    };
-in
-rec {
   pkgs = import sources.nixpkgs {
     inherit system;
     overlays = [
+      sources.rustOverlay.overlay
       sources.devshell.overlay
       (final: prev: {
-        rustc = rustChannel.rust;
+        rustc = rustChannel;
       })
       (final: prev: {
         naersk = prev.callPackage sources.naersk { };
       })
     ];
   };
+in
+{
+  inherit pkgs;
 
   crateDeps =
     with pkgs;
