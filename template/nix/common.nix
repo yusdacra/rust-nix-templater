@@ -1,26 +1,17 @@
 { sources, system }:
 let
-  pkgz = import sources.nixpkgs { inherit system; };
-  mozPkgs = import "${sources.nixpkgsMoz}/package-set.nix" { pkgs = pkgz; };
-
-  rustChannel =
-    let
-      channel = mozPkgs.rustChannelOf {
-        {% if rust_toolchain_file %} rustToolchain = "../rust-toolchain"; {% else %} channel = "{{ rust_toolchain_channel }}"; {% endif %}
-        # Replace this with the expected hash that Nix will output when trying to build the package.
-        sha256 = pkgz.lib.fakeHash;
-      };
-    in
-    channel // {
-      rust = channel.rust.override { extensions = [ "rust-src" "rustfmt-preview" "clippy-preview" ]; };
-    };
+  pkgz = import sources.nixpkgs { inherit system; overlays = [ sources.rustOverlay.overlay ]; };
+  rustChannel = {% if rust_toolchain_file %} (pkgz.rust-bin.fromRustupToolchainFile "../rust-toolchain") {% else %} pkgz.rust-bin."{{ rust_toolchain_channel }}".latest {% endif %};
 
   pkgs = import sources.nixpkgs {
     inherit system;
     overlays = [
+      sources.rustOverlay.overlay
       sources.devshell.overlay
       (final: prev: {
-        rustc = rustChannel.rust;
+        rustc = rustChannel.rust.override {
+          extensions = [ "rust-src" ];
+        };
       })
       (final: prev: {
         naersk = prev.callPackage sources.naersk { };
