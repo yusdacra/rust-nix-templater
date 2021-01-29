@@ -18,19 +18,21 @@ macro_str! {
     FLAKE, "flake.nix";
     COMMON, "nix/common.nix";
     DEV, "nix/devShell.nix";
+    DEFAULT, "nix/default.nix";
+    SHELL, "nix/shell.nix";
+    GITIGNORE, ".gitignore";
+    ENVRC, "nix/envrc";
 }
 
 include_template_files! {
-    "nix/default.nix",
+    DEFAULT!(),
     DEV!(),
-    "nix/shell.nix",
-    "nix/envrc",
-    ".gitignore",
+    SHELL!(),
+    ENVRC!(),
+    GITIGNORE!(),
     BUILD!(),
     COMMON!(),
     FLAKE!(),
-    GITHUB_CI!(),
-    ;
     GITHUB_CI!(),
 }
 
@@ -58,21 +60,36 @@ pub(crate) fn run_with_options(options: Options) {
     let out_dir = options.out_dir;
 
     println!("⚡ Rendering files...");
-    let build_nix = tera.render(BUILD!(), &context).unwrap();
     let flake_nix = tera.render(FLAKE!(), &context).unwrap();
     let common_nix = tera.render(COMMON!(), &context).unwrap();
-    let github_ci = tera.render(GITHUB_CI!(), &context).unwrap();
     let dev = tera.render(DEV!(), &context).unwrap();
 
     println!("💾 Writing rendered files...");
-    let rendered_files = vec![
-        (BUILD!(), build_nix),
+    let mut rendered_files = vec![
         (FLAKE!(), flake_nix),
         (COMMON!(), common_nix),
-        (GITHUB_CI!(), github_ci),
         (DEV!(), dev),
+        (SHELL!(), get_string!(SHELL!()).to_owned()),
+        (GITIGNORE!(), get_string!(GITIGNORE!()).to_owned()),
+        (ENVRC!(), get_string!(ENVRC!()).to_owned()),
     ];
-    write_files(out_dir.as_path(), rendered_files, options.ci);
+
+    if !options.disable_build {
+        let build_nix = tera.render(BUILD!(), &context).unwrap();
+        rendered_files.push((BUILD!(), build_nix));
+        rendered_files.push((DEFAULT!(), get_string!(DEFAULT!()).to_owned()));
+    }
+
+    for ci in options.ci {
+        match ci {
+            CiType::Github => {
+                let github_ci = tera.render(GITHUB_CI!(), &context).unwrap();
+                rendered_files.push((GITHUB_CI!(), github_ci));
+            }
+        }
+    }
+
+    write_files(out_dir.as_path(), rendered_files);
 
     println!("  - Formatting files...");
     if fmt(out_dir.as_path()).is_ok() {
@@ -90,49 +107,14 @@ fn fmt(out_dir: &std::path::Path) -> std::io::Result<Output> {
         .output()
 }
 
-fn write_files(
-    out_dir: &std::path::Path,
-    mut rendered_files: Vec<(&str, String)>,
-    ci_types: Vec<CiType>,
-) {
+fn write_files(out_dir: &std::path::Path, files: Vec<(&str, String)>) {
     use std::fs;
 
     // Create out dir and other dirs we need
     fs::create_dir_all(out_dir.join("nix")).unwrap();
 
-    // Write files we dont need to render
-    for (path, contents) in TEMPLATE {
-        if OPTIONALS.contains(path) {
-            continue;
-        }
-
-        let write_to = out_dir.join(path);
-
-        fs::write(write_to, contents).unwrap();
-    }
-
-    for ci in ci_types {
-        match ci {
-            CiType::Github => {
-                let pos = rendered_files
-                    .iter()
-                    .position(|(name, _)| name == &GITHUB_CI!())
-                    .unwrap();
-                let github_ci = rendered_files.remove(pos).1;
-                let path = out_dir.join(GITHUB_CI!());
-
-                fs::create_dir_all(path.parent().unwrap()).unwrap();
-                fs::write(path, github_ci).unwrap();
-            }
-        }
-    }
-
-    // Write rendered files
-    for (path, contents) in rendered_files {
-        if OPTIONALS.contains(&path) {
-            continue;
-        }
-
+    // Write files
+    for (path, contents) in files {
         fs::write(out_dir.join(path), contents).unwrap();
     }
 }
@@ -216,18 +198,10 @@ macro_rules! get_string {
 macro_rules! include_template_files {
     {
         $($f:expr,)*
-        ;
-        $($fopt:expr,)*
     } => {
         const TEMPLATE: &[(&str, &str)] = &[
             $(
                 ($f, include_str!(concat!("../template/", $f))),
-            )*
-        ];
-
-        const OPTIONALS: &[&str] = &[
-            $(
-                $fopt,
             )*
         ];
     };

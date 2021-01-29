@@ -7,6 +7,7 @@ use std::{
 use structopt::StructOpt;
 
 /// Generates Nix files for Rust projects which uses naersk.
+#[allow(clippy::struct_excessive_bools)]
 #[derive(StructOpt, Debug, Default)]
 #[structopt(name = "rust-nix-templater")]
 pub(crate) struct Options {
@@ -16,6 +17,9 @@ pub(crate) struct Options {
     /// Which CI systems to create CI files for. [example: -c github]
     #[structopt(short, long)]
     pub(crate) ci: Vec<CiType>,
+    /// Disable build files generation.
+    #[structopt(long)]
+    pub(crate) disable_build: bool,
 
     /// Output dir where rendered files will be put in. [example: -o .]
     #[structopt(short, long, default_value = "out")]
