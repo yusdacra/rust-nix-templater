@@ -110,12 +110,13 @@ fn fmt(out_dir: &std::path::Path) -> std::io::Result<Output> {
 fn write_files(out_dir: &std::path::Path, files: Vec<(&str, String)>) {
     use std::fs;
 
-    // Create out dir and other dirs we need
-    fs::create_dir_all(out_dir.join("nix")).unwrap();
-
     // Write files
     for (path, contents) in files {
-        fs::write(out_dir.join(path), contents).unwrap();
+        let path = out_dir.join(path);
+        if let Some(dir) = path.parent() {
+            fs::create_dir_all(dir).unwrap();
+        }
+        fs::write(path, contents).unwrap();
     }
 }
 
