@@ -1,7 +1,9 @@
 { sources, system }:
 let
   pkgz = import sources.nixpkgs { inherit system; overlays = [ sources.rustOverlay.overlay ]; };
-  rustChannel = {% if rust_toolchain_file %} (pkgz.rust-bin.fromRustupToolchainFile "../rust-toolchain") {% else %} pkgz.rust-bin."{{ rust_toolchain_channel }}".latest {% endif %};
+  rust = {% if rust_toolchain_file %} (pkgz.rust-bin.fromRustupToolchainFile "../rust-toolchain") {% else %} pkgz.rust-bin."{{ rust_toolchain_channel }}".latest.rust {% endif %}.override {
+    extensions = [ "rust-src" ];
+  };
 
   pkgs = import sources.nixpkgs {
     inherit system;
@@ -9,9 +11,7 @@ let
       sources.rustOverlay.overlay
       sources.devshell.overlay
       (final: prev: {
-        rustc = rustChannel.rust.override {
-          extensions = [ "rust-src" ];
-        };
+        rustc = rust;
       })
       (final: prev: {
         naersk = prev.callPackage sources.naersk { };
