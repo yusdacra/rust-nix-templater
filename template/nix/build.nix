@@ -33,7 +33,7 @@ let
     buildInputs = crateDeps.buildInputs;
     # WORKAROUND because doctests fail to compile (they compile with nightly cargo but then rustdoc fails)
     cargoTestOptions = def: def ++ [ "--lib" "--tests" "--bins" "--examples" ];
-    override = (prev: env);
+    override = (prev: (lib.listToAttrs (map (e: { "${e.name}" = e.value; }) env)));
     overrideMain = (prev: {
       inherit meta;
       {% if make_desktop_file %}

@@ -43,12 +43,12 @@ in
   
   /* Put env variables here, like so:
 
-    env = {
-      PROTOC = "${pkgs.protobuf}/bin/protoc";
-    };
+    env = with pkgs.lib; [
+      (nameValuePair "PROTOC" "${pkgs.protobuf}/bin/protoc")
+    ];
 
     The variables are not (shell) escaped.
     Variables put here will appear in both dev env and build env.
   */
-  env = { };
+  env = [ ];
 }
