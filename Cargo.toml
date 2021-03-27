@@ -6,6 +6,9 @@ edition = "2018"
 license = "MIT"
 description = "Generates Nix files for Rust applications."
 repository = "https://github.com/yusdacra/rust-nix-templater"
+homepage = "https://github.com/yusdacra/rust-nix-templater"
+keywords = ["nix", "generator"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 tera = { version = "1", default-features = false }

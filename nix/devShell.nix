@@ -1,7 +1,7 @@
 { common }:
 with common; with pkgs;
 devshell.mkShell {
-  packages = [ rustc ] ++ crateDeps.nativeBuildInputs ++ crateDeps.buildInputs;
+  packages = [ rustc ] ++ crateDeps.nativeBuildInputs ++ (pkgs.lib.remove cargo crateDeps.buildInputs);
   commands =
     let
       pkgCmd = pkg: { package = pkg; };
