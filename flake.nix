@@ -23,18 +23,20 @@
           sources = { inherit devshell naersk nixpkgs rustOverlay; };
           inherit system;
         };
-      in
-      rec {
         packages = {
           rust-nix-templater = import ./nix/build.nix { inherit common; release = true; doCheck = true; };
           rust-nix-templater-debug = import ./nix/build.nix { inherit common; };
+        };
+        checks = {
           rust-nix-templater-tests = import ./nix/build.nix { inherit common; doCheck = true; };
         };
-        defaultPackage = packages.rust-nix-templater;
-
         apps = builtins.mapAttrs (n: v: mkApp { name = n; drv = v; exePath = "/bin/rust-nix-templater"; }) packages;
-        defaultApp = apps.rust-nix-templater;
+      in
+      {
+        inherit packages apps checks;
 
+        defaultPackage = packages.rust-nix-templater;
+        defaultApp = apps.rust-nix-templater;
         devShell = import ./nix/devShell.nix { inherit common; };
       }
     );

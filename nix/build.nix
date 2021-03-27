@@ -5,7 +5,7 @@
 }:
 with common;
 let
-  meta = with pkgs.stdenv.lib; {
+  meta = with pkgs.lib; {
     description = "Rust program to generate Nix files for Rust projects.";
     homepage = "https://github.com/yusdacra/rust-nix-templater";
     license = licenses.mit;

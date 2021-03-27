@@ -6,7 +6,7 @@
 }:
 with common;
 let
-  meta = with pkgs.stdenv.lib; {
+  meta = with pkgs.lib; {
     description = {% if package_description %} "{{ package_description }}" {% else %} "Description for {{ package_name }}" {% endif %};
     longDescription = {% if package_long_description %} ''{{ package_long_description }}'' {% else %} ''Long description for {{ package_name }}.'' {% endif %};
     homepage = {% if package_homepage %} "{{ package_homepage }}" {% else %} "https://github.com/<owner>/{{ package_name }}" {% endif %};
