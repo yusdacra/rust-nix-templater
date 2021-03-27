@@ -22,9 +22,9 @@ Generates Nix files for Rust projects which use [naersk](https://github.com/nmat
 Simple:
 
 ```ShellSession
-rust-nix-templater -l mit -n example -o .
+rust-nix-templater -o . mit example
 # is equal to
-rust-nix-templater --license mit --name example --out-dir .
+rust-nix-templater --out-dir . mit example
 ```
 
 This will generate files in the current directory, with license set to `mit` and package name set to `example`. It will generate both build and development environment files that have a binary package, using Rust's `stable` toolchain.
@@ -32,9 +32,9 @@ This will generate files in the current directory, with license set to `mit` and
 For a project that uses `rust-toolchain` file:
 
 ```ShellSession
-rust-nix-templater -T -l mit -n example -o .
+rust-nix-templater -To . mit example
 # is equal to
-rust-nix-templater --use-toolchain-file -l mit -n example -o .
+rust-nix-templater --use-toolchain-file -o . mit example
 ```
 
 This will do what the previous examples does plus use `rust-toolchain` file instead of Rust's `stable` toolchain.
@@ -42,9 +42,9 @@ This will do what the previous examples does plus use `rust-toolchain` file inst
 For a project that uses `rust-toolchain` file, but is only a library:
 
 ```ShellSession
-rust-nix-templater -L -T -l mit -n example -o .
+rust-nix-templater -LTo . mit example
 # is equal to
-rust-nix-templater --library -T -l mit -n example -o .
+rust-nix-templater --library -To . mit example
 ```
 
 This will do what the previous example does but it won't generate a binary package (which means it also won't generate a Flake application).
@@ -52,9 +52,9 @@ This will do what the previous example does but it won't generate a binary packa
 For a project that uses `beta` toolchain and is hosted on GitHub:
 
 ```ShellSession
-rust-nix-templater -c github -t beta -l mit -n example -o .
+rust-nix-templater -c github -t beta -o . mit example
 # is equal to
-rust-nix-templater --ci github --toolchain beta -l mit -n example -o .
+rust-nix-templater --ci github --toolchain beta -o . mit example
 ```
 
 This will do what the first example does, but use `beta` toolchain and also generate a GitHub Actions workflow.
@@ -68,7 +68,7 @@ rust-nix-templater 0.1.0
 Generates Nix files for Rust projects which uses naersk
 
 USAGE:
-    rust-nix-templater [FLAGS] [OPTIONS] --license <package-license> --name <package-name>
+    rust-nix-templater [FLAGS] [OPTIONS] <package-license> <package-name>
 
 FLAGS:
         --disable-build         Disable build files generation
@@ -97,11 +97,7 @@ OPTIONS:
         --icon <package-icon>
             Icon to use in the generated desktop file. [example: --icon assets/icon.ico]
 
-    -l, --license <package-license>
-            License of the package. Can be any of the values listed in
-            https://github.com/NixOS/nixpkgs/blob/master/lib/licenses.nix. [example: -l mit]
     -D, --long-description <package-long-description>    A longer description of the package
-    -n, --name <package-name>                            Name of the package. [example: -n icy_matrix]
     -s, --systems <package-systems>...
             Systems that the package is supported on. [example: -s x86_64-linux x86_64-darwin] [default: nixpkgs default
             systems]
@@ -119,4 +115,10 @@ OPTIONS:
 
     -t, --toolchain <rust-toolchain-channel>
             Rust toolchain channel to use. [example: -t nightly] [default: stable]
+
+
+ARGS:
+    <package-license>    License of the package. Can be any of the values listed in
+                         https://github.com/NixOS/nixpkgs/blob/master/lib/licenses.nix. [example: mit]
+    <package-name>       Name of the package. [example: icy_matrix]
 ```

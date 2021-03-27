@@ -25,12 +25,12 @@ pub(crate) struct Options {
     #[structopt(short, long, default_value = "out")]
     pub(crate) out_dir: PathBuf,
 
-    /// Name of the package. [example: -n icy_matrix]
-    #[structopt(short = "n", long = "name")]
-    pub(crate) package_name: String,
-    /// License of the package. Can be any of the values listed in https://github.com/NixOS/nixpkgs/blob/master/lib/licenses.nix. [example: -l mit]
-    #[structopt(short = "l", long = "license")]
+    /// License of the package. Can be any of the values listed in https://github.com/NixOS/nixpkgs/blob/master/lib/licenses.nix. [example: mit]
+    #[structopt(parse(from_str))]
     pub(crate) package_license: String,
+    /// Name of the package. [example: icy_matrix]
+    #[structopt(parse(from_str))]
+    pub(crate) package_name: String,
     /// Systems that the package is supported on. [example: -s x86_64-linux x86_64-darwin] [default: nixpkgs default systems]
     #[structopt(short = "s", long = "systems")]
     pub(crate) package_systems: Option<Vec<String>>,
