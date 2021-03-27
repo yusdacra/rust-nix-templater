@@ -120,3 +120,33 @@ OPTIONS:
     -t, --toolchain <rust-toolchain-channel>
             Rust toolchain channel to use. [example: -t nightly] [default: stable]
 ```
+## Development
+
+### Building
+
+The Nix flake provides two main build types: release and debug, akin to the Cargo build types.
+
+For debugging, build with debug symbols, but don't test:
+
+```ShellSession
+nix build .#rust-nix-templater-debug
+
+```
+
+For release, which compiles in Cargo release mode:
+
+```ShellSession
+nix build .#rust-nix-templater
+# or
+nix build
+```
+
+### Testing
+
+With Nix flakes, you can check the flake.nix format and run the tests with:
+
+```ShellSession
+nix flake check
+```
+
+This will build and test the `rust-nix-templater-tests` attribute via Cargo tests.
