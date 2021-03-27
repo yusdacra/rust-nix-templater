@@ -1,7 +1,9 @@
 # rust-nix-templater
+
 Generates Nix files for Rust projects which use [naersk](https://github.com/nmattia/naersk).
 
 ## Features
+
 - Generate for applications or libraries
 - Support for both flakes and legacy nix
 - Generates release, debug and test packages
@@ -11,46 +13,56 @@ Generates Nix files for Rust projects which use [naersk](https://github.com/nmat
 - CI file generation (currently only for GitHub Actions)
 
 ## Installation
+
 - Flakes: `nix profile install github:yusdacra/rust-nix-templater`
 - Legacy: `nix-env -i -f "https://github.com/yusdacra/rust-nix-templater/tarball/master"`
 
 ## Examples
 
 Simple:
+
 ```shell
 rust-nix-templater -l mit -n example -o .
 # is equal to
 rust-nix-templater --license mit --name example --out-dir .
 ```
+
 This will generate files in the current directory, with license set to `mit` and package name set to `example`. It will generate both build and development environment files that have a binary package, using Rust's `stable` toolchain.
 
 For a project that uses `rust-toolchain` file:
+
 ```shell
 rust-nix-templater -T -l mit -n example -o .
 # is equal to
 rust-nix-templater --use-toolchain-file -l mit -n example -o .
 ```
+
 This will do what the previous examples does plus use `rust-toolchain` file instead of Rust's `stable` toolchain.
 
 For a project that uses `rust-toolchain` file, but is only a library:
+
 ```shell
 rust-nix-templater -L -T -l mit -n example -o .
 # is equal to
 rust-nix-templater --library -T -l mit -n example -o .
 ```
+
 This will do what the previous example does but it won't generate a binary package (which means it also won't generate a Flake application).
 
 For a project that uses `beta` toolchain and is hosted on GitHub:
+
 ```shell
 rust-nix-templater -c github -t beta -l mit -n example -o .
 # is equal to
 rust-nix-templater --ci github --toolchain beta -l mit -n example -o .
 ```
+
 This will do what the first example does, but use `beta` toolchain and also generate a GitHub Actions workflow.
 
 For more options please check `rust-nix-templater --help`.
 
 ## Usage
+
 ```
 rust-nix-templater 0.1.0
 Generates Nix files for Rust projects which uses naersk
