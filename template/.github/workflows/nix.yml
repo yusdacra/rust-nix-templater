@@ -30,4 +30,4 @@ jobs:
     - name: Build
       run: nix build .#{{ package_name }}-debug -L --show-trace
     - name: Tests
-      run: nix build .#{{ package_name }}-tests -L --show-trace
+      run: nix flake check -L --show-trace

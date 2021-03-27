@@ -28,4 +28,4 @@ jobs:
     - name: Build
       run: nix build .#rust-nix-templater-debug -L --show-trace
     - name: Tests
-      run: nix build .#rust-nix-templater-tests -L --show-trace
+      run: nix flake check -L --show-trace
