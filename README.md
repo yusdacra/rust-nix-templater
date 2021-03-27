@@ -10,7 +10,7 @@ Generates Nix files for Rust projects which use [naersk](https://github.com/nmat
 - Cachix support
 - Generates development shell
 - Desktop file generation
-- CI file generation (currently only for GitHub Actions)
+- CI file generation (GitHub Actions and GitLab CI)
 - Creates Cargo project if one is not found in output directory
 
 ## Installation
