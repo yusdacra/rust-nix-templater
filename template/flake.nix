@@ -34,6 +34,8 @@
           };
           # Compiles faster but no tests and slower executable
           "{{ package_name }}-debug" = import ./nix/build.nix { inherit common; };
+        };
+        checks = {
           # Compiles faster but has tests and slower executable
           "{{ package_name }}-tests" = import ./nix/build.nix { inherit common; doCheck = true; };
         };
@@ -42,7 +44,7 @@
       in
       {
         {% if not disable_build %}
-        inherit packages {% if not package_lib %} apps {% endif %};
+        inherit packages checks {% if not package_lib %} apps {% endif %};
         # Release build is the default package
         defaultPackage = packages."{{ package_name }}";
         {% if not package_lib %}
@@ -50,7 +52,6 @@
         defaultApp = apps."{{ package_name }}";
         {% endif %}
         {% endif %}
-
         devShell = import ./nix/devShell.nix { inherit common; };
       }
     );
