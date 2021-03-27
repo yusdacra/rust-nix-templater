@@ -94,7 +94,7 @@ impl Display for CiTypeParseError {
         match self {
             Self::NotFound => write!(
                 f,
-                "No such CI system supported. Supported CI systems are 'github'."
+                "No such CI system supported. Supported CI systems are 'github' and 'gitlab'."
             ),
         }
     }
@@ -103,6 +103,7 @@ impl Display for CiTypeParseError {
 #[derive(Debug)]
 pub(crate) enum CiType {
     Github,
+    Gitlab,
 }
 
 impl FromStr for CiType {
@@ -111,6 +112,7 @@ impl FromStr for CiType {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_ascii_lowercase().trim() {
             "github" => Ok(Self::Github),
+            "gitlab" => Ok(Self::Gitlab),
             _ => Err(Self::Err::NotFound),
         }
     }

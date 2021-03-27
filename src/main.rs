@@ -12,6 +12,7 @@ use tera::{Context, Tera};
 
 macro_str! {
     GITHUB_CI, ".github/workflows/nix.yml";
+    GITLAB_CI, ".gitlab-ci.yml";
     BUILD, "nix/build.nix";
     FLAKE, "flake.nix";
     COMMON, "nix/common.nix";
@@ -32,6 +33,7 @@ include_template_files! {
     COMMON!(),
     FLAKE!(),
     GITHUB_CI!(),
+    GITLAB_CI!(),
 }
 
 fn main() {
@@ -47,6 +49,7 @@ pub(crate) fn run_with_options(options: Options) {
             (FLAKE!(), get_string!(FLAKE!())),
             (COMMON!(), get_string!(COMMON!())),
             (GITHUB_CI!(), get_string!(GITHUB_CI!())),
+            (GITLAB_CI!(), get_string!(GITLAB_CI!())),
             (DEV!(), get_string!(DEV!())),
         ])
         .unwrap();
@@ -83,6 +86,10 @@ pub(crate) fn run_with_options(options: Options) {
             CiType::Github => {
                 let github_ci = tera.render(GITHUB_CI!(), &context).unwrap();
                 rendered_files.push((GITHUB_CI!(), github_ci));
+            }
+            CiType::Gitlab => {
+                let gitlab_ci = tera.render(GITLAB_CI!(), &context).unwrap();
+                rendered_files.push((GITLAB_CI!(), gitlab_ci));
             }
         }
     }
@@ -192,10 +199,9 @@ fn build_context_from_opts(options: &Options) -> Context {
 
     if let Some(cachix_name) = options.cachix_name.as_deref() {
         context.insert("cachix_name", cachix_name);
-        context.insert(
-            "cachix_public_key",
-            options.cachix_public_key.as_deref().unwrap(),
-        );
+    }
+    if let Some(cachix_public_key) = options.cachix_public_key.as_deref() {
+        context.insert("cachix_public_key", cachix_public_key);
     }
 
     context

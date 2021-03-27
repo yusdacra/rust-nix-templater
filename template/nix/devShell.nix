@@ -10,7 +10,7 @@ devshell.mkShell {
     {% if cachix_name %} (pkgCmd cachix) {% endif %}
   ];
   env = with lib; [
-    {% if cachix_name %}
+    {% if cachix_name and cachix_public_key %}
     (
       nameValuePair "NIX_CONFIG" ''
         substituters = https://cache.nixos.org https://{{ cachix_name }}.cachix.org

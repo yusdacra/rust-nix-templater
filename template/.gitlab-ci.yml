@@ -1,0 +1,18 @@
+image: yusdacra/nix-flake:latest
+
+{% if cachix_name %}
+variables:
+  CACHIX_NAME: {{ cachix_name }}
+
+before_script:
+  - . /bin/pre-build.sh
+
+after_script:
+  - . /bin/post-build.sh
+{% endif %}
+
+build-check:
+  stage: build
+  script:
+    - nix flake check -L --show-trace
+    - nix build .#{{ package_name }}-debug -L --show-trace
