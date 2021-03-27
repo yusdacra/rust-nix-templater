@@ -68,7 +68,6 @@ make_test! {
 }
 
 make_test! {
-    #[should_panic]
     cachix_no_key;
     cachix_name: Some(String::from("test")),
 }
