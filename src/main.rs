@@ -142,6 +142,7 @@ fn build_context_from_opts(options: &Options) -> Context {
         "rust_toolchain_channel",
         &options.rust_toolchain_channel.to_string(),
     );
+    context.insert("disable_build", &options.disable_build);
 
     if let Some(desc) = options.package_description.as_deref() {
         context.insert("package_description", desc);

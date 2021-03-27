@@ -24,6 +24,7 @@
           inherit system;
         };
 
+        {% if not disable_build %}
         packages = {
           # Compiles slower but has tests and faster executable
           "{{ package_name }}" = import ./nix/build.nix {
@@ -37,16 +38,17 @@
           "{{ package_name }}-tests" = import ./nix/build.nix { inherit common; doCheck = true; };
         };
         {% if not package_lib %} apps = builtins.mapAttrs (n: v: mkApp { name = n; drv = v; exePath = "/bin/{{ package_executable }}"; }) packages; {% endif %}
+        {% endif %}
       in
       {
+        {% if not disable_build %}
         inherit packages {% if not package_lib %} apps {% endif %};
-
         # Release build is the default package
         defaultPackage = packages."{{ package_name }}";
-
         {% if not package_lib %}
         # Release build is the default app
         defaultApp = apps."{{ package_name }}";
+        {% endif %}
         {% endif %}
 
         devShell = import ./nix/devShell.nix { inherit common; };
