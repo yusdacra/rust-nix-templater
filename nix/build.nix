@@ -17,6 +17,7 @@ let
     buildInputs = crateDeps.buildInputs;
     overrideMain = (_: {
       TEMPLATER_FMT_BIN = "${nixpkgs-fmt}/bin/nixpkgs-fmt";
+      TEMPLATER_CARGO_BIN = "${cargo}/bin/cargo";
       inherit meta;
     });
     inherit release doCheck;

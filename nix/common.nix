@@ -25,7 +25,7 @@ in
   crateDeps =
     with pkgs;
     {
-      buildInputs = [ nixpkgs-fmt ];
+      buildInputs = [ nixpkgs-fmt cargo ];
       nativeBuildInputs = [ ];
     };
 }

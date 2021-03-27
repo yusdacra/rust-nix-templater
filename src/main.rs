@@ -99,6 +99,27 @@ pub(crate) fn run_with_options(options: Options) {
         ),
     }
 
+    if out_dir.join("Cargo.toml").exists() {
+        println!("  - Existing Cargo project, not creating a new one");
+    } else {
+        println!("  - Creating new Cargo project...");
+        let cargo_bin = option_env!("TEMPLATER_CARGO_BIN").unwrap_or("cargo");
+        match std::process::Command::new(cargo_bin)
+            .arg("init")
+            .arg(&out_dir)
+            .output()
+        {
+            Ok(_) => println!(
+                "  - Created Cargo project successfully: used `{}`",
+                cargo_bin
+            ),
+            Err(err) => println!(
+                "  - Failed to create Cargo project: error while running `{}`: {}",
+                cargo_bin, err
+            ),
+        }
+    }
+
     println!("🎉 Finished!");
 }
 
