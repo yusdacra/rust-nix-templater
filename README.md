@@ -59,6 +59,7 @@ USAGE:
     rust-nix-templater [FLAGS] [OPTIONS] --license <package-license> --name <package-name>
 
 FLAGS:
+        --disable-build         Disable build files generation
         --help                  Prints help information
     -M, --mk-desktop-file       Create a desktop file
     -L, --library               Create a library package instead of a binary package
