@@ -8,8 +8,6 @@ mod tests;
 use options::{CiType, Options};
 use structopt::StructOpt;
 
-use std::process::Output;
-
 use tera::{Context, Tera};
 
 macro_str! {
@@ -92,19 +90,16 @@ pub(crate) fn run_with_options(options: Options) {
     write_files(out_dir.as_path(), rendered_files);
 
     println!("  - Formatting files...");
-    if fmt(out_dir.as_path()).is_ok() {
-        println!("  - Format successful!");
-    } else {
-        println!("  - Failed to format: do you have `nixpkgs-fmt` installed and in your $PATH?");
+    let fmt_bin = option_env!("TEMPLATER_FMT_BIN").unwrap_or("nixpkgs-fmt");
+    match std::process::Command::new(fmt_bin).arg(&out_dir).output() {
+        Ok(_) => println!("  - Format successful: used `{}`", fmt_bin),
+        Err(err) => println!(
+            "  - Failed to format: error while running `{}`: {}",
+            fmt_bin, err
+        ),
     }
 
     println!("🎉 Finished!");
-}
-
-fn fmt(out_dir: &std::path::Path) -> std::io::Result<Output> {
-    std::process::Command::new("nixpkgs-fmt")
-        .arg(out_dir)
-        .output()
 }
 
 fn write_files(out_dir: &std::path::Path, files: Vec<(&str, String)>) {
