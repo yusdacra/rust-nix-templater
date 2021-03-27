@@ -11,6 +11,7 @@ Generates Nix files for Rust projects which use [naersk](https://github.com/nmat
 - Generates development shell
 - Desktop file generation
 - CI file generation (currently only for GitHub Actions)
+- Creates Cargo project if one is not found in output directory
 
 ## Installation
 
@@ -22,19 +23,19 @@ Generates Nix files for Rust projects which use [naersk](https://github.com/nmat
 Simple:
 
 ```ShellSession
-rust-nix-templater -o . mit example
+rust-nix-templater mit example
 # is equal to
-rust-nix-templater --out-dir . mit example
+rust-nix-templater mit example
 ```
 
-This will generate files in the current directory, with license set to `mit` and package name set to `example`. It will generate both build and development environment files that have a binary package, using Rust's `stable` toolchain.
+This will generate files in the current directory, with license set to `mit` and package name set to `example`. It will generate both build and development environment files that have a binary package, using Rust's `stable` toolchain. If the current directory doesn't already have a Cargo project, this will create one.
 
 For a project that uses `rust-toolchain` file:
 
 ```ShellSession
-rust-nix-templater -To . mit example
+rust-nix-templater -T mit example
 # is equal to
-rust-nix-templater --use-toolchain-file -o . mit example
+rust-nix-templater --use-toolchain-file mit example
 ```
 
 This will do what the previous examples does plus use `rust-toolchain` file instead of Rust's `stable` toolchain.
@@ -42,9 +43,9 @@ This will do what the previous examples does plus use `rust-toolchain` file inst
 For a project that uses `rust-toolchain` file, but is only a library:
 
 ```ShellSession
-rust-nix-templater -LTo . mit example
+rust-nix-templater -LT mit example
 # is equal to
-rust-nix-templater --library -To . mit example
+rust-nix-templater --library -T mit example
 ```
 
 This will do what the previous example does but it won't generate a binary package (which means it also won't generate a Flake application).
@@ -52,9 +53,9 @@ This will do what the previous example does but it won't generate a binary packa
 For a project that uses `beta` toolchain and is hosted on GitHub:
 
 ```ShellSession
-rust-nix-templater -c github -t beta -o . mit example
+rust-nix-templater -c github -t beta mit example
 # is equal to
-rust-nix-templater --ci github --toolchain beta -o . mit example
+rust-nix-templater --ci github --toolchain beta mit example
 ```
 
 This will do what the first example does, but use `beta` toolchain and also generate a GitHub Actions workflow.
@@ -85,7 +86,7 @@ OPTIONS:
             1:Tmy1V0KK+nxzg0XFePL/++t4JRKAw5tvr+FNfHz7mIY=""]
     -c, --ci <ci>...                                     Which CI systems to create CI files for. [example: -c github]
     -o, --out-dir <out-dir>
-            Output dir where rendered files will be put in. [example: -o .] [default: out]
+            Output directory where generated files will be put in. [example: -o example] [default: .]
 
     -d, --description <package-description>              A short, single line description of the package
     -e, --executable <package-executable>

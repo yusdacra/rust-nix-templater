@@ -21,8 +21,8 @@ pub(crate) struct Options {
     #[structopt(long)]
     pub(crate) disable_build: bool,
 
-    /// Output dir where rendered files will be put in. [example: -o .]
-    #[structopt(short, long, default_value = "out")]
+    /// Output directory where generated files will be put in. [example: -o example]
+    #[structopt(short, long, default_value = ".")]
     pub(crate) out_dir: PathBuf,
 
     /// License of the package. Can be any of the values listed in https://github.com/NixOS/nixpkgs/blob/master/lib/licenses.nix. [example: mit]
