@@ -21,7 +21,7 @@ Generates Nix files for Rust projects which use [naersk](https://github.com/nmat
 
 Simple:
 
-```shell
+```ShellSession
 rust-nix-templater -l mit -n example -o .
 # is equal to
 rust-nix-templater --license mit --name example --out-dir .
@@ -31,7 +31,7 @@ This will generate files in the current directory, with license set to `mit` and
 
 For a project that uses `rust-toolchain` file:
 
-```shell
+```ShellSession
 rust-nix-templater -T -l mit -n example -o .
 # is equal to
 rust-nix-templater --use-toolchain-file -l mit -n example -o .
@@ -41,7 +41,7 @@ This will do what the previous examples does plus use `rust-toolchain` file inst
 
 For a project that uses `rust-toolchain` file, but is only a library:
 
-```shell
+```ShellSession
 rust-nix-templater -L -T -l mit -n example -o .
 # is equal to
 rust-nix-templater --library -T -l mit -n example -o .
@@ -51,7 +51,7 @@ This will do what the previous example does but it won't generate a binary packa
 
 For a project that uses `beta` toolchain and is hosted on GitHub:
 
-```shell
+```ShellSession
 rust-nix-templater -c github -t beta -l mit -n example -o .
 # is equal to
 rust-nix-templater --ci github --toolchain beta -l mit -n example -o .
