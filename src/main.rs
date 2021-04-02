@@ -116,10 +116,21 @@ pub(crate) fn run_with_options(options: Options) {
             .arg(&out_dir)
             .output()
         {
-            Ok(_) => println!(
-                "  - Created Cargo project successfully: used `{}`",
-                cargo_bin
-            ),
+            Ok(_) => {
+                println!(
+                    "  - Created Cargo project successfully: used `{}`",
+                    cargo_bin
+                );
+                match std::process::Command::new(cargo_bin)
+                    .arg("generate-lockfile")
+                    .arg("--manifest-path")
+                    .arg(out_dir.join("Cargo.toml"))
+                    .output()
+                {
+                    Ok(_) => println!("    - Generated cargo lockfile successfully"),
+                    Err(err) => println!("    - Failed to generate cargo lockfile: {}", err),
+                }
+            }
             Err(err) => println!(
                 "  - Failed to create Cargo project: error while running `{}`: {}",
                 cargo_bin, err
