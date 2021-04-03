@@ -17,7 +17,7 @@ pub(crate) struct Options {
     /// Which CI systems to create CI files for. [example: -c github]
     #[structopt(short, long)]
     pub(crate) ci: Vec<CiType>,
-    /// Disable build files generation.
+    /// Disable build files generation. This also disable app flake output generation.
     #[structopt(long)]
     pub(crate) disable_build: bool,
 
@@ -25,12 +25,12 @@ pub(crate) struct Options {
     #[structopt(short, long, default_value = ".")]
     pub(crate) out_dir: PathBuf,
 
-    /// License of the package. Can be any of the values listed in https://github.com/NixOS/nixpkgs/blob/master/lib/licenses.nix. [example: mit]
-    #[structopt(parse(from_str))]
-    pub(crate) package_license: String,
-    /// Name of the package. [example: icy_matrix]
-    #[structopt(parse(from_str))]
-    pub(crate) package_name: String,
+    /// License of the package. Must be a valid Cargo.toml license. [example: mit]
+    #[structopt(short = "l", long = "license")]
+    pub(crate) package_license: Option<String>,
+    /// Name of the package. Must be passed when also creating a Cargo project. [example: icy_matrix]
+    #[structopt(short = "n", long = "name")]
+    pub(crate) package_name: Option<String>,
     /// Systems that the package is supported on. [example: -s x86_64-linux x86_64-darwin] [default: nixpkgs default systems]
     #[structopt(short = "s", long = "systems")]
     pub(crate) package_systems: Option<Vec<String>>,
@@ -45,7 +45,10 @@ pub(crate) struct Options {
     #[structopt(short = "h", long = "homepage")]
     pub(crate) package_homepage: Option<String>,
 
-    /// Create a library package instead of a binary package.
+    /// Whether to disable app output for flake.
+    #[structopt(short = "A", long = "no-app")]
+    pub(crate) disable_app: bool,
+    /// Whether to copy libraries to package output.
     #[structopt(short = "L", long = "library")]
     pub(crate) package_lib: bool,
     /// Name of the executable `cargo build` generates.

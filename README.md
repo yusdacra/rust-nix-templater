@@ -4,6 +4,7 @@ Generates Nix files for Rust projects which use [naersk](https://github.com/nmat
 
 ## Features
 
+- One place for configuration; Cargo.toml
 - Generate for applications or libraries
 - Support for both flakes and legacy nix
 - Generates release, debug and test packages
@@ -23,9 +24,9 @@ Generates Nix files for Rust projects which use [naersk](https://github.com/nmat
 Simple:
 
 ```ShellSession
-rust-nix-templater mit example
+rust-nix-templater -l mit -n example
 # is equal to
-rust-nix-templater mit example
+rust-nix-templater --license mit --name example
 ```
 
 This will generate files in the current directory, with license set to `mit` and package name set to `example`. It will generate both build and development environment files that have a binary package, using Rust's `stable` toolchain. If the current directory doesn't already have a Cargo project, this will create one.
@@ -33,9 +34,9 @@ This will generate files in the current directory, with license set to `mit` and
 For a project that uses `rust-toolchain` file:
 
 ```ShellSession
-rust-nix-templater -T mit example
+rust-nix-templater -T -l mit -n example
 # is equal to
-rust-nix-templater --use-toolchain-file mit example
+rust-nix-templater --use-toolchain-file -l mit -n example
 ```
 
 This will do what the previous examples does plus use `rust-toolchain` file instead of Rust's `stable` toolchain.
@@ -43,9 +44,9 @@ This will do what the previous examples does plus use `rust-toolchain` file inst
 For a project that uses `rust-toolchain` file, but is only a library:
 
 ```ShellSession
-rust-nix-templater -LT mit example
+rust-nix-templater -LT -l mit -n example
 # is equal to
-rust-nix-templater --library -T mit example
+rust-nix-templater --library -T -l mit -n example
 ```
 
 This will do what the previous example does but it won't generate a binary package (which means it also won't generate a Flake application).
@@ -53,9 +54,9 @@ This will do what the previous example does but it won't generate a binary packa
 For a project that uses `beta` toolchain and is hosted on GitHub:
 
 ```ShellSession
-rust-nix-templater -c github -t beta mit example
+rust-nix-templater -c github -t beta -l mit -n example
 # is equal to
-rust-nix-templater --ci github --toolchain beta mit example
+rust-nix-templater --ci github --toolchain beta -l mit -n example
 ```
 
 This will do what the first example does, but use `beta` toolchain and also generate a GitHub Actions workflow.
@@ -69,13 +70,14 @@ rust-nix-templater 0.1.0
 Generates Nix files for Rust projects which uses naersk
 
 USAGE:
-    rust-nix-templater [FLAGS] [OPTIONS] <package-license> <package-name>
+    rust-nix-templater [FLAGS] [OPTIONS]
 
 FLAGS:
-        --disable-build         Disable build files generation
+    -A, --no-app                Whether to disable app output for flake
+        --disable-build         Disable build files generation. This also disable app flake output generation
         --help                  Prints help information
     -M, --mk-desktop-file       Create a desktop file
-    -L, --library               Create a library package instead of a binary package
+    -L, --library               Whether to copy libraries to package output
     -T, --use-toolchain-file    Use the `rust-toolchain` file instead of a channel
     -V, --version               Prints version information
 
@@ -98,7 +100,13 @@ OPTIONS:
         --icon <package-icon>
             Icon to use in the generated desktop file. [example: --icon assets/icon.ico]
 
+    -l, --license <package-license>
+            License of the package. Must be a valid Cargo.toml license. [example: mit]
+
     -D, --long-description <package-long-description>    A longer description of the package
+    -n, --name <package-name>
+            Name of the package. Must be passed when also creating a Cargo project. [example: icy_matrix]
+
     -s, --systems <package-systems>...
             Systems that the package is supported on. [example: -s x86_64-linux x86_64-darwin] [default: nixpkgs default
             systems]
@@ -116,12 +124,6 @@ OPTIONS:
 
     -t, --toolchain <rust-toolchain-channel>
             Rust toolchain channel to use. [example: -t nightly] [default: stable]
-
-
-ARGS:
-    <package-license>    License of the package. Can be any of the values listed in
-                         https://github.com/NixOS/nixpkgs/blob/master/lib/licenses.nix. [example: mit]
-    <package-name>       Name of the package. [example: icy_matrix]
 ```
 ## Development
 

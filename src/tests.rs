@@ -17,9 +17,8 @@ macro_rules! make_test {
         fn $tname() {
             run_with_options(Options {
                 $( $name: $value, )*
-                package_name: String::from("test"),
-                package_license: String::from("mit"),
                 out_dir: PathBuf::from("out"),
+                package_name: Some("test".to_owned()),
                 ..Options::default()
             })
         }

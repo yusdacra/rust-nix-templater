@@ -1,14 +1,14 @@
 #![warn(clippy::pedantic)]
-#![allow(clippy::non_ascii_literal)]
+#![allow(clippy::non_ascii_literal, clippy::too_many_lines)]
 
 mod options;
 #[cfg(test)]
 mod tests;
 
+use std::fmt::Display;
+
 use options::{CiType, Options};
 use structopt::StructOpt;
-
-use tera::{Context, Tera};
 
 macro_str! {
     GITHUB_CI, ".github/workflows/nix.yml";
@@ -36,60 +36,79 @@ include_template_files! {
     GITLAB_CI!(),
 }
 
+const GITHUB_CACHIX: &str = r"    - name: Cachix cache
+      uses: cachix/cachix-action@v8
+      with:
+        name: cachix_name
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+";
+
+const GITLAB_CACHIX: &str = r"
+variables:
+  CACHIX_NAME: cachix_name
+before_script:
+  - . /bin/pre-build.sh
+after_script:
+  - . /bin/post-build.sh
+";
+
 fn main() {
     let options = Options::from_args();
     run_with_options(options);
 }
 
 pub(crate) fn run_with_options(options: Options) {
-    let tera = {
-        let mut tera = Tera::default();
-        tera.add_raw_templates(vec![
-            (BUILD!(), get_string!(BUILD!())),
-            (FLAKE!(), get_string!(FLAKE!())),
-            (COMMON!(), get_string!(COMMON!())),
-            (GITHUB_CI!(), get_string!(GITHUB_CI!())),
-            (GITLAB_CI!(), get_string!(GITLAB_CI!())),
-            (DEV!(), get_string!(DEV!())),
-        ])
-        .unwrap();
-        tera
-    };
-
-    let context = build_context_from_opts(&options);
-
     let out_dir = options.out_dir;
+    let cargo_toml_path = out_dir.join("Cargo.toml");
+    let has_project = cargo_toml_path.exists();
 
-    println!("⚡ Rendering files...");
-    let flake_nix = tera.render(FLAKE!(), &context).unwrap();
-    let common_nix = tera.render(COMMON!(), &context).unwrap();
-    let dev = tera.render(DEV!(), &context).unwrap();
-
-    println!("💾 Writing rendered files...");
-    let mut rendered_files = vec![
-        (FLAKE!(), flake_nix),
-        (COMMON!(), common_nix),
-        (DEV!(), dev),
-        (SHELL!(), get_string!(SHELL!()).to_owned()),
-        (GITIGNORE!(), get_string!(GITIGNORE!()).to_owned()),
-        (ENVRC!(), get_string!(ENVRC!()).to_owned()),
-    ];
-
-    if !options.disable_build {
-        let build_nix = tera.render(BUILD!(), &context).unwrap();
-        rendered_files.push((BUILD!(), build_nix));
-        rendered_files.push((DEFAULT!(), get_string!(DEFAULT!()).to_owned()));
+    if has_project {
+        println!("- Existing Cargo project detected.")
+    } else {
+        println!("- No Cargo project detected.");
+        if options.package_name.is_none() {
+            println!("  - You must pass a project name while creating a Cargo project, aborting.");
+            std::process::exit(1);
+        }
     }
+
+    println!("💾 Writing files...");
+    let mut rendered_files = std::array::IntoIter::new([
+        FLAKE!(),
+        COMMON!(),
+        DEV!(),
+        SHELL!(),
+        GITIGNORE!(),
+        ENVRC!(),
+        BUILD!(),
+        DEFAULT!(),
+    ])
+    .map(|name| (name, get_string!(name).to_owned()))
+    .collect::<Vec<_>>();
 
     for ci in options.ci {
         match ci {
             CiType::Github => {
-                let github_ci = tera.render(GITHUB_CI!(), &context).unwrap();
-                rendered_files.push((GITHUB_CI!(), github_ci));
+                let github_file = get_string!(GITHUB_CI!());
+                let rendered = github_file.replace(
+                    GITHUB_CACHIX,
+                    &options.cachix_name.as_ref().map_or_else(
+                        || "".to_owned(),
+                        |cachix_name| GITHUB_CACHIX.replace("cachix_name", cachix_name),
+                    ),
+                );
+                rendered_files.push((GITHUB_CI!(), rendered));
             }
             CiType::Gitlab => {
-                let gitlab_ci = tera.render(GITLAB_CI!(), &context).unwrap();
-                rendered_files.push((GITLAB_CI!(), gitlab_ci));
+                let gitlab_file = get_string!(GITLAB_CI!());
+                let rendered = gitlab_file.replace(
+                    GITLAB_CACHIX,
+                    &options.cachix_name.as_ref().map_or_else(
+                        || "".to_owned(),
+                        |cachix_name| GITLAB_CACHIX.replace("cachix_name", cachix_name),
+                    ),
+                );
+                rendered_files.push((GITLAB_CI!(), rendered));
             }
         }
     }
@@ -106,9 +125,7 @@ pub(crate) fn run_with_options(options: Options) {
         ),
     }
 
-    if out_dir.join("Cargo.toml").exists() {
-        println!("  - Existing Cargo project, not creating a new one");
-    } else {
+    if !has_project {
         println!("  - Creating new Cargo project...");
         let cargo_bin = option_env!("TEMPLATER_CARGO_BIN").unwrap_or("cargo");
         match std::process::Command::new(cargo_bin)
@@ -124,21 +141,128 @@ pub(crate) fn run_with_options(options: Options) {
                 match std::process::Command::new(cargo_bin)
                     .arg("generate-lockfile")
                     .arg("--manifest-path")
-                    .arg(out_dir.join("Cargo.toml"))
+                    .arg(&cargo_toml_path)
                     .output()
                 {
-                    Ok(_) => println!("    - Generated cargo lockfile successfully"),
-                    Err(err) => println!("    - Failed to generate cargo lockfile: {}", err),
+                    Ok(_) => println!("    - Generated Cargo lockfile successfully"),
+                    Err(err) => println!("    - Failed to generate Cargo lockfile: {}", err),
                 }
             }
-            Err(err) => println!(
-                "  - Failed to create Cargo project: error while running `{}`: {}",
-                cargo_bin, err
-            ),
+            Err(err) => {
+                println!(
+                    "  - Failed to create Cargo project: error while running `{}`: {}",
+                    cargo_bin, err
+                );
+                std::process::exit(2);
+            }
         }
     }
 
+    let mut cargo_toml = std::fs::read_to_string(&cargo_toml_path)
+        .expect("couldnt read cargo toml")
+        .lines()
+        .map(str::to_string)
+        .collect::<Vec<_>>();
+    let mut index = cargo_toml
+        .iter()
+        .position(|line| line.contains("name = "))
+        .expect("no package field in cargo toml, maybe workspace?")
+        + 1;
+    if !cargo_toml.iter().any(|line| line.contains("license = ")) {
+        if let Some(license) = &options.package_license {
+            cargo_toml.insert(index, format!("license = \"{}\"", license));
+            index += 1;
+        }
+    }
+    if !cargo_toml
+        .iter()
+        .any(|line| line.contains("description = "))
+    {
+        if let Some(description) = &options.package_description {
+            cargo_toml.insert(index, format!("description = \"{}\"", description));
+        }
+    }
+    cargo_toml.push("\n[package.metadata.nix]".to_owned());
+    cargo_toml.push("# Toggle app flake output".to_owned());
+    cargo_toml.kv("app", !options.disable_app);
+    cargo_toml.push("# Toggle flake outputs that build (checks, package and app)".to_owned());
+    cargo_toml.kv("build", !options.disable_build);
+    cargo_toml.push("# Whether to copy built library to package output".to_owned());
+    cargo_toml.kv("library", options.package_lib);
+    if let Some(long_description) = &options.package_long_description {
+        cargo_toml.kv("longDescription", quote(long_description));
+    }
+    if let Some(executable) = &options.package_executable {
+        cargo_toml.push("# Executable name to be used for app output".to_owned());
+        cargo_toml.kv("executable", quote(executable));
+    }
+    if !options.rust_toolchain_file {
+        cargo_toml.push("# Toolchain to be used".to_owned());
+        cargo_toml.kv("toolchain", quote(options.rust_toolchain_channel));
+    }
+    if let Some(cachix_name) = &options.cachix_name {
+        cargo_toml.push("\n[package.metadata.nix.cachix]".to_owned());
+        cargo_toml.push("# Name of the cachix binary cache".to_owned());
+        cargo_toml.kv("name", quote(cachix_name));
+        if let Some(cachix_key) = &options.cachix_public_key {
+            cargo_toml.push("# Public key of this cache".to_owned());
+            cargo_toml.kv("key", quote(cachix_key));
+        }
+    }
+    if options.make_desktop_file {
+        cargo_toml.push("\n[package.metadata.nix.xdg]".to_owned());
+        cargo_toml.push("# Whether to generete an XDG desktop file".to_owned());
+        cargo_toml.kv("enable", true);
+        if let Some(desktop_name) = &options.package_xdg_desktop_name {
+            cargo_toml.kv("desktopName", quote(desktop_name));
+        }
+        if let Some(generic_name) = &options.package_xdg_generic_name {
+            cargo_toml.kv("genericName", quote(generic_name));
+        }
+        if let Some(categories) = &options.package_xdg_categories {
+            cargo_toml.kv(
+                "categories",
+                quote(
+                    categories
+                        .iter()
+                        .map(|c| format!("{}; ", c))
+                        .collect::<String>(),
+                ),
+            );
+        }
+        if let Some(comment) = &options.package_xdg_comment {
+            cargo_toml.kv("comment", quote(comment));
+        }
+        if let Some(icon) = &options.package_icon {
+            cargo_toml.kv("icon", quote(icon));
+        }
+    }
+    let new_cargo_toml = cargo_toml
+        .into_iter()
+        .map(|mut c| {
+            c.reserve(1);
+            c.push('\n');
+            c
+        })
+        .collect::<String>();
+    std::fs::write(&cargo_toml_path, new_cargo_toml.into_bytes())
+        .expect("couldnt write new cargo toml");
+
     println!("🎉 Finished!");
+}
+
+trait TomlExt {
+    fn kv(&mut self, key: impl Display, value: impl Display);
+}
+
+impl TomlExt for Vec<String> {
+    fn kv(&mut self, key: impl Display, value: impl Display) {
+        self.push(format!("{} = {}", key, value));
+    }
+}
+
+fn quote(value: impl Display) -> String {
+    format!("\"{}\"", value)
 }
 
 fn write_files(out_dir: &std::path::Path, files: Vec<(&str, String)>) {
@@ -152,70 +276,6 @@ fn write_files(out_dir: &std::path::Path, files: Vec<(&str, String)>) {
         }
         fs::write(path, contents).unwrap();
     }
-}
-
-fn build_context_from_opts(options: &Options) -> Context {
-    let mut context = Context::new();
-
-    // Essential variables
-    context.insert("package_name", &options.package_name);
-    context.insert(
-        "package_executable",
-        options
-            .package_executable
-            .as_deref()
-            .unwrap_or(&options.package_name),
-    );
-    context.insert("package_lib", &options.package_lib);
-    context.insert("package_license", &options.package_license);
-    if let Some(systems) = options.package_systems.as_deref() {
-        context.insert("package_systems", systems);
-    }
-    context.insert("rust_toolchain_file", &options.rust_toolchain_file);
-    context.insert(
-        "rust_toolchain_channel",
-        &options.rust_toolchain_channel.to_string(),
-    );
-    context.insert("disable_build", &options.disable_build);
-
-    if let Some(desc) = options.package_description.as_deref() {
-        context.insert("package_description", desc);
-    }
-    if let Some(long_desc) = options.package_long_description.as_deref() {
-        context.insert("package_long_description", long_desc);
-    }
-    if let Some(homepage) = options.package_homepage.as_deref() {
-        context.insert("package_homepage", homepage);
-    }
-
-    let mk_desktop_file = options.make_desktop_file && !options.package_lib;
-    context.insert("make_desktop_file", &mk_desktop_file);
-    if mk_desktop_file {
-        if let Some(icon) = options.package_icon.as_deref() {
-            context.insert("package_icon", icon);
-        }
-        if let Some(comment) = options.package_xdg_comment.as_deref() {
-            context.insert("package_xdg_comment", comment);
-        }
-        if let Some(name) = options.package_xdg_desktop_name.as_deref() {
-            context.insert("package_xdg_desktop_name", name);
-        }
-        if let Some(name) = options.package_xdg_generic_name.as_deref() {
-            context.insert("package_xdg_generic_name", name);
-        }
-        if let Some(categories) = options.package_xdg_categories.as_deref() {
-            context.insert("package_xdg_categories", categories);
-        }
-    }
-
-    if let Some(cachix_name) = options.cachix_name.as_deref() {
-        context.insert("cachix_name", cachix_name);
-    }
-    if let Some(cachix_public_key) = options.cachix_public_key.as_deref() {
-        context.insert("cachix_public_key", cachix_public_key);
-    }
-
-    context
 }
 
 #[macro_export]

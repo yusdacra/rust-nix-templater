@@ -5,7 +5,7 @@ on:
   push:
     branches: [ master ]
 jobs:
-  tests:
+  check:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout repository
@@ -20,14 +20,10 @@ jobs:
         extra_nix_config: |
           experimental-features = nix-command flakes
         nix_path: nixpkgs=channel:nixos-unstable
-    {% if cachix_name %}
     - name: Cachix cache
       uses: cachix/cachix-action@v8
       with:
-        name: {{ cachix_name }}
-        authToken: {% raw %}'${{ secrets.CACHIX_AUTH_TOKEN }}'{% endraw %}
-    {% endif %}
-    - name: Build
-      run: nix build .#{{ package_name }}-debug -L --show-trace
+        name: cachix_name
+        authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
     - name: Tests
       run: nix flake check -L --show-trace
