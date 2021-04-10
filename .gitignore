@@ -1,17 +1,14 @@
 # Rust
-/target
+/target/
+**/*.rs.bk
 
 # Nix
 /result*
 /nix/result*
-/shell.nix
 
-# direnv
+# Direnv
 /.direnv
 /.envrc
 
-# IDEs / editors
 /.vscode
-
-# templater
 /out

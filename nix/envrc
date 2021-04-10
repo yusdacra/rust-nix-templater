@@ -1,8 +1,0 @@
-watch_file nix/devShell.nix
-watch_file nix/common.nix
-
-if nix flake --help &> /dev/null; then
-	use flake
-else
-	use nix nix/shell.nix
-fi

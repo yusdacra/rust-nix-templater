@@ -16,7 +16,7 @@ macro_str! {
     FLAKE, "flake.nix";
     DEFAULT, "default.nix";
     SHELL, "shell.nix";
-    GITIGNORE, ".gitignore";
+    GITIGNORE, "gitignore";
     ENVRC, ".envrc";
 }
 
@@ -249,6 +249,11 @@ fn write_files(out_dir: &std::path::Path, files: Vec<(&str, String)>) {
 
     // Write files
     for (path, contents) in files {
+        let path = if path == "gitignore" {
+            ".gitignore"
+        } else {
+            path
+        };
         let path = out_dir.join(path);
         if let Some(dir) = path.parent() {
             fs::create_dir_all(dir).unwrap();
