@@ -7,5 +7,5 @@
     };
   };
 
-  outputs = inputs: inputs.nixCargoIntegration.lib.makeFlakeOutputs ./.;
+  outputs = inputs: inputs.nixCargoIntegration.lib.makeOutputsForSystems ./.;
 }
