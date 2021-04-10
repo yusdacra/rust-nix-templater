@@ -9,7 +9,7 @@ Generates Nix files for Rust projects which use [naersk](https://github.com/nmat
 - Support for both flakes and legacy nix
 - Generates release, debug and test packages
 - Cachix support
-- Generates development shell
+- Generates development shell (uses [devshell](https://github.com/numtide/devshell), supports top-level `devshell.toml` file)
 - Desktop file generation
 - CI file generation (GitHub Actions and GitLab CI)
 - Creates Cargo project if one is not found in output directory
@@ -17,6 +17,7 @@ Generates Nix files for Rust projects which use [naersk](https://github.com/nmat
 ## Installation
 
 - Flakes: `nix profile install github:yusdacra/rust-nix-templater`
+    - Or run without installing: `nix run github:yusdacra/rust-nix-templater`
 - Legacy: `nix-env -i -f "https://github.com/yusdacra/rust-nix-templater/tarball/master"`
 
 ## Examples
@@ -154,4 +155,4 @@ With Nix flakes, you can check the flake.nix format and run the tests with:
 nix flake check
 ```
 
-This will build and test the `rust-nix-templater-tests` attribute via Cargo tests.
+This will build and test the `rust-nix-templater-tests` attribute (which also runs Cargo tests).
