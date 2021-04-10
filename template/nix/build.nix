@@ -16,15 +16,20 @@ let
   // (optionalAttrs (builtins.hasAttr "longDescription" cargoToml.package.metadata.nix) { inherit (cargoToml.package.metadata.nix) longDescription; }));
 
   desktopFile =
+    with pkgs.lib;
     let
       name = cargoToml.package.name;
+      makeIcon = icon:
+        if (hasPrefix "./" icon)
+        then "${../.}/${removePrefix "./" icon}"
+        else icon;
     in
-    with pkgs.lib; ((pkgs.makeDesktopItem {
+    ((pkgs.makeDesktopItem {
       inherit name;
       exec = cargoToml.package.metadata.nix.executable or name;
       comment = tomlDesktopFile.comment or meta.description;
       desktopName = tomlDesktopFile.name or name;
-    }) // (optionalAttrs (builtins.hasAttr "icon" tomlDesktopFile) { icon = tomlDesktopFile.icon; })
+    }) // (optionalAttrs (builtins.hasAttr "icon" tomlDesktopFile) { icon = makeIcon tomlDesktopFile.icon; })
     // (optionalAttrs (builtins.hasAttr "genericName" tomlDesktopFile) { inherit (tomlDesktopFile) genericName; })
     // (optionalAttrs (builtins.hasAttr "categories" tomlDesktopFile) { inherit (tomlDesktopFile) categories; }));
 

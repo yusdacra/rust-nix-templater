@@ -149,8 +149,10 @@ OPTIONS:
 
 ### `package.metadata.nix.xdg` attributes
 
-- `icon`: relative path to the icon file (type: string)
-    - uses project directory as base path
+- `enable`: whether to enable desktop file generation (type: boolean)
+- `icon`: icon string according to XDG (type: string)
+    - strings starting with "./" will be treated as relative to project directory
+    - everything else will be put into the desktop file as-is
 - `comment`: comment for the desktop file (type: string)
     - defaults to `package.description` if not specified
 - `name`: desktop name for the desktop file (type: string)
