@@ -50,7 +50,7 @@ in
   /* Put env variables here, like so:
 
     env = {
-      PROTOC = "${pkgs.protobuf}/bin/protoc";
+    PROTOC = "${pkgs.protobuf}/bin/protoc";
     };
 
     The variables are not (shell) escaped.
