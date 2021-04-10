@@ -1,6 +1,6 @@
 # rust-nix-templater
 
-Generates Nix files for Rust projects which use [naersk](https://github.com/nmattia/naersk).
+Generates Rust projects which use [nix-cargo-integration](https://github.com/yusdacra/nix-cargo-integration).
 
 ## Features
 
@@ -127,47 +127,6 @@ OPTIONS:
             Rust toolchain channel to use. [example: -t nightly] [default: stable]
 ```
 
-## `package.metadata.nix` attributes
-
-- `systems`: systems to enable for the flake (type: list)
-    - defaults to `defaultSystems` of `nixpkgs`
-- `executable`: executable name of the build binary (type: string)
-- `build`: whether to enable outputs which build the package (type: boolean)
-    - defaults to `false` if not specified
-- `library`: whether to copy built library to package output (type: boolean)
-    - defaults to `false` if not specified
-- `app`: whether to enable the application output (type: boolean)
-    - defaults to `false` if not specified
-- `toolchain`: rust toolchain to use (type: one of "stable", "beta" or "nightly")
-    - if not specified, `rust-toolchain` file will be used
-- `longDescription`: a longer description (type: string)
-
-### `package.metadata.nix.cachix` attributes
-
-- `name`: name of the cachix cache (type: string)
-- `key`: public key of the cachix cache (type: string)
-
-### `package.metadata.nix.xdg` attributes
-
-- `enable`: whether to enable desktop file generation (type: boolean)
-- `icon`: icon string according to XDG (type: string)
-    - strings starting with "./" will be treated as relative to project directory
-    - everything else will be put into the desktop file as-is
-- `comment`: comment for the desktop file (type: string)
-    - defaults to `package.description` if not specified
-- `name`: desktop name for the desktop file (type: string)
-    - defaults to `package.name` if not specified
-- `genericName`: generic name for the desktop file (type: string)
-- `categories`: categories for the desktop file according to XDG specification (type: string)
-
-### `package.metadata.nix.devshell` attributes
-
-Refer to [devshell] documentation.
-
-NOTE: Attributes specified here **will not** be used if a top-level `devshell.toml` file exists.
-
-### 
-
 ## Development
 
 ### Building
@@ -178,7 +137,6 @@ For debugging, build with debug symbols, but don't test:
 
 ```ShellSession
 nix build .#rust-nix-templater-debug
-
 ```
 
 For release, which compiles in Cargo release mode:

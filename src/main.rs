@@ -13,24 +13,18 @@ use structopt::StructOpt;
 macro_str! {
     GITHUB_CI, ".github/workflows/nix.yml";
     GITLAB_CI, ".gitlab-ci.yml";
-    BUILD, "nix/build.nix";
     FLAKE, "flake.nix";
-    COMMON, "nix/common.nix";
-    DEV, "nix/devShell.nix";
-    DEFAULT, "nix/default.nix";
-    SHELL, "nix/shell.nix";
+    DEFAULT, "default.nix";
+    SHELL, "shell.nix";
     GITIGNORE, ".gitignore";
-    ENVRC, "nix/envrc";
+    ENVRC, ".envrc";
 }
 
 include_template_files! {
     DEFAULT!(),
-    DEV!(),
     SHELL!(),
     ENVRC!(),
     GITIGNORE!(),
-    BUILD!(),
-    COMMON!(),
     FLAKE!(),
     GITHUB_CI!(),
     GITLAB_CI!(),
@@ -73,43 +67,28 @@ pub(crate) fn run_with_options(options: Options) {
     }
 
     println!("💾 Writing files...");
-    let mut rendered_files = std::array::IntoIter::new([
-        FLAKE!(),
-        COMMON!(),
-        DEV!(),
-        SHELL!(),
-        GITIGNORE!(),
-        ENVRC!(),
-        BUILD!(),
-        DEFAULT!(),
-    ])
-    .map(|name| (name, get_string!(name).to_owned()))
-    .collect::<Vec<_>>();
+    let mut rendered_files =
+        std::array::IntoIter::new([FLAKE!(), SHELL!(), GITIGNORE!(), ENVRC!(), DEFAULT!()])
+            .map(|name| (name, get_string!(name).to_owned()))
+            .collect::<Vec<_>>();
+
+    let cachix_name = &options.cachix_name;
+    let mut cachix_render = |replacement: &str, filename| {
+        let github_file = get_string!(filename);
+        let rendered = github_file.replace(
+            replacement,
+            &cachix_name.as_ref().map_or_else(
+                || "".to_owned(),
+                |cachix_name| replacement.replace("cachix_name", cachix_name),
+            ),
+        );
+        rendered_files.push((filename, rendered));
+    };
 
     for ci in options.ci {
         match ci {
-            CiType::Github => {
-                let github_file = get_string!(GITHUB_CI!());
-                let rendered = github_file.replace(
-                    GITHUB_CACHIX,
-                    &options.cachix_name.as_ref().map_or_else(
-                        || "".to_owned(),
-                        |cachix_name| GITHUB_CACHIX.replace("cachix_name", cachix_name),
-                    ),
-                );
-                rendered_files.push((GITHUB_CI!(), rendered));
-            }
-            CiType::Gitlab => {
-                let gitlab_file = get_string!(GITLAB_CI!());
-                let rendered = gitlab_file.replace(
-                    GITLAB_CACHIX,
-                    &options.cachix_name.as_ref().map_or_else(
-                        || "".to_owned(),
-                        |cachix_name| GITLAB_CACHIX.replace("cachix_name", cachix_name),
-                    ),
-                );
-                rendered_files.push((GITLAB_CI!(), rendered));
-            }
+            CiType::Github => cachix_render(GITHUB_CACHIX, GITHUB_CI!()),
+            CiType::Gitlab => cachix_render(GITLAB_CACHIX, GITLAB_CI!()),
         }
     }
 
