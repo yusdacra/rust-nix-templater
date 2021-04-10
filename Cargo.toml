@@ -1,6 +1,6 @@
 [package]
 name = "rust-nix-templater"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Yusuf Bera Ertan <y.bera003.06@protonmail.com>"]
 edition = "2018"
 license = "MIT"
@@ -21,11 +21,7 @@ codegen-units = 1
 panic = 'abort'
 
 [package.metadata.nix]
-# Toggle app flake output
 app = true
-# Toggle flake outputs that build (checks, package and app)
 build = true
-# Whether to copy built library to package output
 library = false
-# Toolchain to be used
 toolchain = "stable"
