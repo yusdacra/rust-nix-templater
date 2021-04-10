@@ -48,7 +48,7 @@ let
         inherit meta;
       } // (
         lib.optionalAttrs makeDesktopFile
-          { nativeBuildInputs = prev.nativeBuildInputs ++ [ copyDesktopItems wrapGAppsHook ]; desktopItems = [ desktopFile ]; }
+          { nativeBuildInputs = prev.nativeBuildInputs ++ [ copyDesktopItems ]; desktopItems = [ desktopFile ]; }
       ));
       copyLibs = library;
       inherit release doCheck doDoc;
