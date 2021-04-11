@@ -7,5 +7,5 @@
     };
   };
 
-  outputs = inputs: inputs.nixCargoIntegration.lib.makeOutputsForSystems ./.;
+  outputs = inputs: inputs.nixCargoIntegration.lib.makeOutputs { root = ./.; };
 }
