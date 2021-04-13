@@ -15,12 +15,14 @@ macro_rules! make_test {
         $(#[$meta])*
         #[test]
         fn $tname() {
+            let out_dir = PathBuf::from(format!("/tmp/rust-nix-templater-{}-test", std::time::UNIX_EPOCH.elapsed().unwrap().as_nanos()));
             run_with_options(Options {
                 $( $name: $value, )*
-                out_dir: PathBuf::from("out"),
+                out_dir: out_dir.clone(),
                 package_name: Some("test".to_owned()),
                 ..Options::default()
-            })
+            });
+            let _ = std::fs::remove_dir_all(out_dir);
         }
     };
 }
