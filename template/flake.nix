@@ -18,6 +18,17 @@
       lib = inputs.nixpkgs.lib;
     in
     {
+      # Override sources used by nixCargoIntegration in common.
+      # This can be used to provide sources that are only needed for
+      # specific systems or crates.
+      sources = common: prev: {
+        # rustOverlay = inputs.rustOverlay;
+      };
+      # Override nixpkgs configuration in common. This can be used 
+      # to add overlays for specific systems or crates.
+      pkgs = common: prev: {
+        # overlays = prev.overlays ++ [ inputs.someInput.someOverlay ];
+      };
       # Common attribute overrides.
       common = prev: {
         # Package set used can be overriden here; note that changing
