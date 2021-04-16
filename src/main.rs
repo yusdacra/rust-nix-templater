@@ -31,7 +31,7 @@ include_template_files! {
 }
 
 const GITHUB_CACHIX: &str = r"    - name: Cachix cache
-      uses: cachix/cachix-action@v8
+      uses: cachix/cachix-action@v10
       with:
         name: cachix_name
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
