@@ -65,9 +65,9 @@ pub struct Options {
     /// Generic name to put in the generated desktop file. [example: --xdg-generic-name "Matrix Client"]
     #[structopt(long = "xdg-generic-name")]
     pub package_xdg_generic_name: Option<String>,
-    /// Categories to put in the generated desktop file. [example: --xdg-categories Network InstantMessaging]
+    /// Categories to put in the generated desktop file. [example: --xdg-categories "Network;InstantMessaging;"]
     #[structopt(long = "xdg-categories")]
-    pub package_xdg_categories: Option<Vec<String>>,
+    pub package_xdg_categories: Option<String>,
 
     /// Use the `rust-toolchain` file instead of a channel.
     #[structopt(short = "T", long = "use-toolchain-file")]

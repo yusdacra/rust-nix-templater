@@ -238,15 +238,7 @@ pub fn run_with_options(options: Options, print_msg: bool) -> anyhow::Result<()>
             cargo_toml.kv("genericName", quote(generic_name));
         }
         if let Some(categories) = &options.package_xdg_categories {
-            cargo_toml.kv(
-                "categories",
-                quote(
-                    categories
-                        .iter()
-                        .map(|c| format!("{}; ", c))
-                        .collect::<String>(),
-                ),
-            );
+            cargo_toml.kv("categories", quote(categories));
         }
         if let Some(comment) = &options.package_xdg_comment {
             cargo_toml.kv("comment", quote(comment));

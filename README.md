@@ -67,7 +67,7 @@ For more options please check `rust-nix-templater --help`.
 ## Usage
 
 ```
-rust-nix-templater 0.2.2
+rust-nix-templater 0.2.3
 Generates Nix files for Rust projects which uses naersk
 
 USAGE:
@@ -110,8 +110,8 @@ OPTIONS:
     -s, --systems <package-systems>...
             Systems that the package is supported on. [example: -s x86_64-linux x86_64-darwin] [default: nixpkgs default
             systems]
-        --xdg-categories <package-xdg-categories>...
-            Categories to put in the generated desktop file. [example: --xdg-categories Network InstantMessaging]
+        --xdg-categories <package-xdg-categories>
+            Categories to put in the generated desktop file. [example: --xdg-categories "Network;InstantMessaging;"]
 
         --xdg-comment <package-xdg-comment>
             Comment to put in the generated desktop file. [default: package description]
