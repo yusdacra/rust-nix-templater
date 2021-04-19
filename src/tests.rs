@@ -33,7 +33,7 @@ make_test! {
 
 make_test! {
     with_desktop_file;
-    make_desktop_file: true,
+    package_xdg_desktop_name: Some("name".to_string()),
 }
 
 make_test! {
@@ -93,5 +93,5 @@ make_test! {
 make_test! {
     lib_package_desktop;
     package_lib: true,
-    make_desktop_file: true,
+    package_xdg_desktop_name: Some("name".to_string()),
 }
