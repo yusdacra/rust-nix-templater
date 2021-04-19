@@ -12,6 +12,7 @@ categories = ["command-line-utilities"]
 
 [dependencies]
 structopt = "0.3"
+anyhow = "1.0"
 
 [profile.release]
 # Since we don't have any performance need, we optimize for size

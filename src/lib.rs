@@ -8,6 +8,7 @@ mod tests;
 pub use options::Options;
 pub use structopt::StructOpt;
 
+use anyhow::bail;
 use options::CiType;
 use std::fmt::Display;
 
@@ -47,10 +48,7 @@ after_script:
   - . /bin/post-build.sh
 ";
 
-pub fn run_with_options(
-    options: Options,
-    print_msg: bool,
-) -> Result<i32, Box<dyn std::error::Error>> {
+pub fn run_with_options(options: Options, print_msg: bool) -> anyhow::Result<()> {
     let out_dir = options.out_dir;
     let cargo_toml_path = out_dir.join("Cargo.toml");
     let has_project = cargo_toml_path.exists();
@@ -69,7 +67,7 @@ pub fn run_with_options(
                     "  - You must pass a project name while creating a Cargo project, aborting."
                 );
             }
-            return Ok(1);
+            bail!("must set a project name while creating a cargo project");
         }
     }
 
@@ -165,7 +163,7 @@ pub fn run_with_options(
                         cargo_bin, err
                     );
                 }
-                return Ok(2);
+                bail!("failed to create cargo project: {}", err);
             }
         }
     }
@@ -265,7 +263,8 @@ pub fn run_with_options(
     if print_msg {
         println!("🎉 Finished!");
     }
-    Ok(0)
+
+    Ok(())
 }
 
 trait TomlExt {
@@ -282,10 +281,7 @@ fn quote(value: impl Display) -> String {
     format!("\"{}\"", value)
 }
 
-fn write_files(
-    out_dir: &std::path::Path,
-    files: Vec<(&str, String)>,
-) -> Result<(), Box<dyn std::error::Error>> {
+fn write_files(out_dir: &std::path::Path, files: Vec<(&str, String)>) -> anyhow::Result<()> {
     use std::fs;
 
     // Write files
