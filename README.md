@@ -55,9 +55,9 @@ This will do what the previous example does but it won't generate a binary packa
 For a project that uses `beta` toolchain and is hosted on GitHub:
 
 ```ShellSession
-rust-nix-templater -c github -t beta -l mit -n example
+rust-nix-templater --github-ci -t beta -l mit -n example
 # is equal to
-rust-nix-templater --ci github --toolchain beta -l mit -n example
+rust-nix-templater --github-ci --toolchain beta -l mit -n example
 ```
 
 This will do what the first example does, but use `beta` toolchain and also generate a GitHub Actions workflow.
@@ -76,6 +76,8 @@ USAGE:
 FLAGS:
     -A, --no-app                Whether to disable app output for flake
         --disable-build         Disable app / builds flake output generation
+        --github-ci             Enable GitHub Actions file generation
+        --gitlab-ci             Enable GitLab CI file generation
         --help                  Prints help information
     -L, --library               Whether to copy libraries to package output
     -T, --use-toolchain-file    Use the `rust-toolchain` file instead of a channel
@@ -86,7 +88,6 @@ OPTIONS:
         --cachix-public-key <cachix-public-key>
             Cachix cache public key. [example: --cachix-public-key "rust-nix-templater.cachix.org-
             1:Tmy1V0KK+nxzg0XFePL/++t4JRKAw5tvr+FNfHz7mIY=""]
-    -c, --ci <ci>...                                     Which CI systems to create CI files for. [example: -c github]
     -o, --out-dir <out-dir>
             Output directory where generated files will be put in. [example: -o example] [default: .]
 

@@ -9,7 +9,6 @@ pub use options::Options;
 pub use structopt::StructOpt;
 
 use anyhow::bail;
-use options::CiType;
 use std::fmt::Display;
 
 macro_str! {
@@ -92,11 +91,11 @@ pub fn run_with_options(options: Options, print_msg: bool) -> anyhow::Result<()>
         rendered_files.push((filename, rendered));
     };
 
-    for ci in options.ci {
-        match ci {
-            CiType::Github => cachix_render(GITHUB_CACHIX, GITHUB_CI!()),
-            CiType::Gitlab => cachix_render(GITLAB_CACHIX, GITLAB_CI!()),
-        }
+    if options.github_ci {
+        cachix_render(GITHUB_CACHIX, GITHUB_CI!());
+    }
+    if options.gitlab_ci {
+        cachix_render(GITLAB_CACHIX, GITLAB_CI!());
     }
 
     write_files(out_dir.as_path(), rendered_files)?;

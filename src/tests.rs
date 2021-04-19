@@ -1,6 +1,6 @@
 use crate::{
     make_test,
-    options::{CiType, Options, RustToolchainChannel},
+    options::{Options, RustToolchainChannel},
     run_with_options,
 };
 use std::{path::PathBuf, str::FromStr};
@@ -38,7 +38,12 @@ make_test! {
 
 make_test! {
     with_github_ci;
-    ci: vec![CiType::Github],
+    github_ci: true,
+}
+
+make_test! {
+    with_gitlab_ci;
+    gitlab_ci: true,
 }
 
 make_test! {
@@ -77,12 +82,6 @@ make_test! {
     #[should_panic]
     wrong_toolchain_channel;
     rust_toolchain_channel: RustToolchainChannel::from_str("definitely invalid channel").unwrap(),
-}
-
-make_test! {
-    #[should_panic]
-    wrong_ci_name;
-    ci: vec![CiType::from_str("invalid ci tpye").unwrap()],
 }
 
 make_test! {

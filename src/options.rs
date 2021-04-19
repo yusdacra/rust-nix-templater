@@ -11,9 +11,12 @@ use structopt::StructOpt;
 #[derive(StructOpt, Debug, Default, Clone)]
 #[structopt(name = "rust-nix-templater")]
 pub struct Options {
-    /// Which CI systems to create CI files for. [example: -c github]
-    #[structopt(short, long)]
-    pub ci: Vec<CiType>,
+    /// Enable GitHub Actions file generation.
+    #[structopt(long)]
+    pub github_ci: bool,
+    /// Enable GitLab CI file generation.
+    #[structopt(long)]
+    pub gitlab_ci: bool,
     /// Disable app / builds flake output generation.
     #[structopt(long)]
     pub disable_build: bool,
@@ -82,40 +85,6 @@ pub struct Options {
     /// Cachix cache public key. [example: --cachix-public-key "rust-nix-templater.cachix.org-1:Tmy1V0KK+nxzg0XFePL/++t4JRKAw5tvr+FNfHz7mIY=""]
     #[structopt(long)]
     pub cachix_public_key: Option<String>,
-}
-
-#[derive(Debug)]
-pub enum CiTypeParseError {
-    NotFound,
-}
-
-impl Display for CiTypeParseError {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match self {
-            Self::NotFound => write!(
-                f,
-                "No such CI system supported. Supported CI systems are 'github' and 'gitlab'."
-            ),
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum CiType {
-    Github,
-    Gitlab,
-}
-
-impl FromStr for CiType {
-    type Err = CiTypeParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_ascii_lowercase().trim() {
-            "github" => Ok(Self::Github),
-            "gitlab" => Ok(Self::Gitlab),
-            _ => Err(Self::Err::NotFound),
-        }
-    }
 }
 
 #[derive(Debug)]
