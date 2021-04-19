@@ -21,7 +21,7 @@ macro_rules! make_test {
                 out_dir: out_dir.clone(),
                 package_name: Some("test".to_owned()),
                 ..Options::default()
-            });
+            }, false).unwrap();
             let _ = std::fs::remove_dir_all(out_dir);
         }
     };

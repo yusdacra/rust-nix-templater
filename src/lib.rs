@@ -47,22 +47,35 @@ after_script:
   - . /bin/post-build.sh
 ";
 
-pub fn run_with_options(options: Options) {
+pub fn run_with_options(
+    options: Options,
+    print_msg: bool,
+) -> Result<i32, Box<dyn std::error::Error>> {
     let out_dir = options.out_dir;
     let cargo_toml_path = out_dir.join("Cargo.toml");
     let has_project = cargo_toml_path.exists();
 
     if has_project {
-        println!("- Existing Cargo project detected.")
+        if print_msg {
+            println!("- Existing Cargo project detected.")
+        }
     } else {
-        println!("- No Cargo project detected.");
+        if print_msg {
+            println!("- No Cargo project detected.");
+        }
         if options.package_name.is_none() {
-            println!("  - You must pass a project name while creating a Cargo project, aborting.");
-            std::process::exit(1);
+            if print_msg {
+                println!(
+                    "  - You must pass a project name while creating a Cargo project, aborting."
+                );
+            }
+            return Ok(1);
         }
     }
 
-    println!("💾 Writing files...");
+    if print_msg {
+        println!("💾 Writing files...");
+    }
     let mut rendered_files =
         std::array::IntoIter::new([FLAKE!(), SHELL!(), GITIGNORE!(), ENVRC!(), DEFAULT!()])
             .map(|name| (name, get_string!(name).to_owned()))
@@ -88,20 +101,32 @@ pub fn run_with_options(options: Options) {
         }
     }
 
-    write_files(out_dir.as_path(), rendered_files);
+    write_files(out_dir.as_path(), rendered_files)?;
 
-    println!("  - Formatting files...");
+    if print_msg {
+        println!("  - Formatting files...");
+    }
     let fmt_bin = option_env!("TEMPLATER_FMT_BIN").unwrap_or("nixpkgs-fmt");
     match std::process::Command::new(fmt_bin).arg(&out_dir).output() {
-        Ok(_) => println!("  - Format successful: used `{}`", fmt_bin),
-        Err(err) => println!(
-            "  - Failed to format: error while running `{}`: {}",
-            fmt_bin, err
-        ),
+        Ok(_) => {
+            if print_msg {
+                println!("  - Format successful: used `{}`", fmt_bin)
+            }
+        }
+        Err(err) => {
+            if print_msg {
+                println!(
+                    "  - Failed to format: error while running `{}`: {}",
+                    fmt_bin, err
+                )
+            }
+        }
     }
 
     if !has_project {
-        println!("  - Creating new Cargo project...");
+        if print_msg {
+            println!("  - Creating new Cargo project...");
+        }
         let cargo_bin = option_env!("TEMPLATER_CARGO_BIN").unwrap_or("cargo");
         match std::process::Command::new(cargo_bin)
             .arg("init")
@@ -109,55 +134,72 @@ pub fn run_with_options(options: Options) {
             .output()
         {
             Ok(_) => {
-                println!(
-                    "  - Created Cargo project successfully: used `{}`",
-                    cargo_bin
-                );
+                if print_msg {
+                    println!(
+                        "  - Created Cargo project successfully: used `{}`",
+                        cargo_bin
+                    );
+                }
                 match std::process::Command::new(cargo_bin)
                     .arg("generate-lockfile")
                     .arg("--manifest-path")
                     .arg(&cargo_toml_path)
                     .output()
                 {
-                    Ok(_) => println!("    - Generated Cargo lockfile successfully"),
-                    Err(err) => println!("    - Failed to generate Cargo lockfile: {}", err),
+                    Ok(_) => {
+                        if print_msg {
+                            println!("    - Generated Cargo lockfile successfully")
+                        }
+                    }
+                    Err(err) => {
+                        if print_msg {
+                            println!("    - Failed to generate Cargo lockfile: {}", err)
+                        }
+                    }
                 }
             }
             Err(err) => {
-                println!(
-                    "  - Failed to create Cargo project: error while running `{}`: {}",
-                    cargo_bin, err
-                );
-                std::process::exit(2);
+                if print_msg {
+                    println!(
+                        "  - Failed to create Cargo project: error while running `{}`: {}",
+                        cargo_bin, err
+                    );
+                }
+                return Ok(2);
             }
         }
     }
 
-    let mut cargo_toml = std::fs::read_to_string(&cargo_toml_path)
-        .expect("couldnt read cargo toml")
+    let mut cargo_toml = std::fs::read_to_string(&cargo_toml_path)?
         .lines()
         .map(str::to_string)
         .collect::<Vec<_>>();
-    let mut index = cargo_toml
+
+    let index = cargo_toml
         .iter()
         .position(|line| line.contains("name = "))
-        .expect("no package field in cargo toml, maybe workspace?")
-        + 1;
-    if !cargo_toml.iter().any(|line| line.contains("license = ")) {
-        if let Some(license) = &options.package_license {
-            cargo_toml.insert(index, format!("license = \"{}\"", license));
-            index += 1;
+        .map(|i| i + 1);
+
+    if let Some(mut index) = index {
+        if !cargo_toml.iter().any(|line| line.contains("license = ")) {
+            if let Some(license) = &options.package_license {
+                cargo_toml.insert(index, format!("license = \"{}\"", license));
+                index += 1;
+            }
+        }
+        if !cargo_toml
+            .iter()
+            .any(|line| line.contains("description = "))
+        {
+            if let Some(description) = &options.package_description {
+                cargo_toml.insert(index, format!("description = \"{}\"", description));
+            }
         }
     }
-    if !cargo_toml
-        .iter()
-        .any(|line| line.contains("description = "))
-    {
-        if let Some(description) = &options.package_description {
-            cargo_toml.insert(index, format!("description = \"{}\"", description));
-        }
-    }
-    cargo_toml.push("\n[package.metadata.nix]".to_owned());
+
+    let parent = index.is_some().then(|| "package").unwrap_or("workspace");
+
+    cargo_toml.push(format!("\n[{}.metadata.nix]", parent));
     cargo_toml.push("# Toggle app flake output".to_owned());
     cargo_toml.kv("app", !options.disable_app);
     cargo_toml.push("# Toggle flake outputs that build (checks, package and app)".to_owned());
@@ -176,7 +218,7 @@ pub fn run_with_options(options: Options) {
         cargo_toml.kv("toolchain", quote(options.rust_toolchain_channel));
     }
     if let Some(cachix_name) = &options.cachix_name {
-        cargo_toml.push("\n[package.metadata.nix.cachix]".to_owned());
+        cargo_toml.push(format!("\n[{}.metadata.nix.cachix]", parent));
         cargo_toml.push("# Name of the cachix binary cache".to_owned());
         cargo_toml.kv("name", quote(cachix_name));
         if let Some(cachix_key) = &options.cachix_public_key {
@@ -185,11 +227,9 @@ pub fn run_with_options(options: Options) {
         }
     }
     if options.make_desktop_file {
-        cargo_toml.push("\n[package.metadata.nix.xdg]".to_owned());
-        cargo_toml.push("# Whether to generete an XDG desktop file".to_owned());
-        cargo_toml.kv("enable", true);
+        cargo_toml.push(format!("\n[{}.metadata.nix.desktopFile]", parent));
         if let Some(desktop_name) = &options.package_xdg_desktop_name {
-            cargo_toml.kv("desktopName", quote(desktop_name));
+            cargo_toml.kv("name", quote(desktop_name));
         }
         if let Some(generic_name) = &options.package_xdg_generic_name {
             cargo_toml.kv("genericName", quote(generic_name));
@@ -220,10 +260,12 @@ pub fn run_with_options(options: Options) {
             c
         })
         .collect::<String>();
-    std::fs::write(&cargo_toml_path, new_cargo_toml.into_bytes())
-        .expect("couldnt write new cargo toml");
+    std::fs::write(&cargo_toml_path, new_cargo_toml.into_bytes())?;
 
-    println!("🎉 Finished!");
+    if print_msg {
+        println!("🎉 Finished!");
+    }
+    Ok(0)
 }
 
 trait TomlExt {
@@ -240,7 +282,10 @@ fn quote(value: impl Display) -> String {
     format!("\"{}\"", value)
 }
 
-fn write_files(out_dir: &std::path::Path, files: Vec<(&str, String)>) {
+fn write_files(
+    out_dir: &std::path::Path,
+    files: Vec<(&str, String)>,
+) -> Result<(), Box<dyn std::error::Error>> {
     use std::fs;
 
     // Write files
@@ -252,10 +297,12 @@ fn write_files(out_dir: &std::path::Path, files: Vec<(&str, String)>) {
         };
         let path = out_dir.join(path);
         if let Some(dir) = path.parent() {
-            fs::create_dir_all(dir).unwrap();
+            fs::create_dir_all(dir)?;
         }
-        fs::write(path, contents).unwrap();
+        fs::write(path, contents)?;
     }
+
+    Ok(())
 }
 
 #[macro_export]
