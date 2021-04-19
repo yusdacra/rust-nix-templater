@@ -10,85 +10,85 @@ use structopt::StructOpt;
 #[allow(clippy::struct_excessive_bools)]
 #[derive(StructOpt, Debug, Default)]
 #[structopt(name = "rust-nix-templater")]
-pub(crate) struct Options {
+pub struct Options {
     /// Create a desktop file.
     #[structopt(short = "M", long = "mk-desktop-file")]
-    pub(crate) make_desktop_file: bool,
+    pub make_desktop_file: bool,
     /// Which CI systems to create CI files for. [example: -c github]
     #[structopt(short, long)]
-    pub(crate) ci: Vec<CiType>,
+    pub ci: Vec<CiType>,
     /// Disable build files generation. This also disable app flake output generation.
     #[structopt(long)]
-    pub(crate) disable_build: bool,
+    pub disable_build: bool,
 
     /// Output directory where generated files will be put in. [example: -o example]
     #[structopt(short, long, default_value = ".")]
-    pub(crate) out_dir: PathBuf,
+    pub out_dir: PathBuf,
 
     /// License of the package. Must be a valid Cargo.toml license. [example: mit]
     #[structopt(short = "l", long = "license")]
-    pub(crate) package_license: Option<String>,
+    pub package_license: Option<String>,
     /// Name of the package. Must be passed when also creating a Cargo project. [example: icy_matrix]
     #[structopt(short = "n", long = "name")]
-    pub(crate) package_name: Option<String>,
+    pub package_name: Option<String>,
     /// Systems that the package is supported on. [example: -s x86_64-linux x86_64-darwin] [default: nixpkgs default systems]
     #[structopt(short = "s", long = "systems")]
-    pub(crate) package_systems: Option<Vec<String>>,
+    pub package_systems: Option<Vec<String>>,
 
     /// A short, single line description of the package.
     #[structopt(short = "d", long = "description")]
-    pub(crate) package_description: Option<String>,
+    pub package_description: Option<String>,
     /// A longer description of the package.
     #[structopt(short = "D", long = "long-description")]
-    pub(crate) package_long_description: Option<String>,
+    pub package_long_description: Option<String>,
     /// Homepage of the package. [example: -h "https://gitlab.com/example/example"]
     #[structopt(short = "h", long = "homepage")]
-    pub(crate) package_homepage: Option<String>,
+    pub package_homepage: Option<String>,
 
     /// Whether to disable app output for flake.
     #[structopt(short = "A", long = "no-app")]
-    pub(crate) disable_app: bool,
+    pub disable_app: bool,
     /// Whether to copy libraries to package output.
     #[structopt(short = "L", long = "library")]
-    pub(crate) package_lib: bool,
+    pub package_lib: bool,
     /// Name of the executable `cargo build` generates.
     /// Required if your package's executable name is different from your package's name.
     #[structopt(short = "e", long = "executable")]
-    pub(crate) package_executable: Option<String>,
+    pub package_executable: Option<String>,
 
     /// Icon to use in the generated desktop file. [example: --icon assets/icon.ico]
     #[structopt(long = "icon")]
-    pub(crate) package_icon: Option<String>,
+    pub package_icon: Option<String>,
     /// Comment to put in the generated desktop file. [default: package description]
     #[structopt(long = "xdg-comment")]
-    pub(crate) package_xdg_comment: Option<String>,
+    pub package_xdg_comment: Option<String>,
     /// Desktop name to put in the generated desktop file. Defaults to package name. [example: --xdg-desktop-name "Icy Matrix"]
     #[structopt(long = "xdg-desktop-name")]
-    pub(crate) package_xdg_desktop_name: Option<String>,
+    pub package_xdg_desktop_name: Option<String>,
     /// Generic name to put in the generated desktop file. [example: --xdg-generic-name "Matrix Client"]
     #[structopt(long = "xdg-generic-name")]
-    pub(crate) package_xdg_generic_name: Option<String>,
+    pub package_xdg_generic_name: Option<String>,
     /// Categories to put in the generated desktop file. [example: --xdg-categories Network InstantMessaging]
     #[structopt(long = "xdg-categories")]
-    pub(crate) package_xdg_categories: Option<Vec<String>>,
+    pub package_xdg_categories: Option<Vec<String>>,
 
     /// Use the `rust-toolchain` file instead of a channel.
     #[structopt(short = "T", long = "use-toolchain-file")]
-    pub(crate) rust_toolchain_file: bool,
+    pub rust_toolchain_file: bool,
     /// Rust toolchain channel to use. [example: -t nightly]
     #[structopt(short = "t", long = "toolchain", default_value = "stable")]
-    pub(crate) rust_toolchain_channel: RustToolchainChannel,
+    pub rust_toolchain_channel: RustToolchainChannel,
 
     /// Cachix cache name. [example: --cachix-name rust-nix-templater]
     #[structopt(long)]
-    pub(crate) cachix_name: Option<String>,
+    pub cachix_name: Option<String>,
     /// Cachix cache public key. [example: --cachix-public-key "rust-nix-templater.cachix.org-1:Tmy1V0KK+nxzg0XFePL/++t4JRKAw5tvr+FNfHz7mIY=""]
     #[structopt(long)]
-    pub(crate) cachix_public_key: Option<String>,
+    pub cachix_public_key: Option<String>,
 }
 
 #[derive(Debug)]
-pub(crate) enum CiTypeParseError {
+pub enum CiTypeParseError {
     NotFound,
 }
 
@@ -104,7 +104,7 @@ impl Display for CiTypeParseError {
 }
 
 #[derive(Debug)]
-pub(crate) enum CiType {
+pub enum CiType {
     Github,
     Gitlab,
 }
@@ -122,7 +122,7 @@ impl FromStr for CiType {
 }
 
 #[derive(Debug)]
-pub(crate) enum RustToolchainChannelParseError {
+pub enum RustToolchainChannelParseError {
     Invalid,
 }
 
@@ -135,7 +135,7 @@ impl Display for RustToolchainChannelParseError {
 }
 
 #[derive(Debug)]
-pub(crate) enum RustToolchainChannel {
+pub enum RustToolchainChannel {
     Stable,
     Beta,
     Nightly,
