@@ -11,13 +11,10 @@ use structopt::StructOpt;
 #[derive(StructOpt, Debug, Default, Clone)]
 #[structopt(name = "rust-nix-templater")]
 pub struct Options {
-    /// Create a desktop file.
-    #[structopt(short = "M", long = "mk-desktop-file")]
-    pub make_desktop_file: bool,
     /// Which CI systems to create CI files for. [example: -c github]
     #[structopt(short, long)]
     pub ci: Vec<CiType>,
-    /// Disable build files generation. This also disable app flake output generation.
+    /// Disable app / builds flake output generation.
     #[structopt(long)]
     pub disable_build: bool,
 

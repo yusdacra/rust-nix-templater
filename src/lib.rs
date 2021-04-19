@@ -224,7 +224,12 @@ pub fn run_with_options(options: Options, print_msg: bool) -> anyhow::Result<()>
             cargo_toml.kv("key", quote(cachix_key));
         }
     }
-    if options.make_desktop_file {
+    if options.package_xdg_desktop_name.is_some()
+        || options.package_xdg_generic_name.is_some()
+        || options.package_xdg_categories.is_some()
+        || options.package_xdg_comment.is_some()
+        || options.package_icon.is_some()
+    {
         cargo_toml.push(format!("\n[{}.metadata.nix.desktopFile]", parent));
         if let Some(desktop_name) = &options.package_xdg_desktop_name {
             cargo_toml.kv("name", quote(desktop_name));

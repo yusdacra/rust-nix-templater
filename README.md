@@ -67,7 +67,7 @@ For more options please check `rust-nix-templater --help`.
 ## Usage
 
 ```
-rust-nix-templater 0.1.0
+rust-nix-templater 0.2.2
 Generates Nix files for Rust projects which uses naersk
 
 USAGE:
@@ -75,9 +75,8 @@ USAGE:
 
 FLAGS:
     -A, --no-app                Whether to disable app output for flake
-        --disable-build         Disable build files generation. This also disable app flake output generation
+        --disable-build         Disable app / builds flake output generation
         --help                  Prints help information
-    -M, --mk-desktop-file       Create a desktop file
     -L, --library               Whether to copy libraries to package output
     -T, --use-toolchain-file    Use the `rust-toolchain` file instead of a channel
     -V, --version               Prints version information
