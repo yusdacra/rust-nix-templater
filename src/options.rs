@@ -8,7 +8,7 @@ use structopt::StructOpt;
 
 /// Generates Nix files for Rust projects which uses naersk.
 #[allow(clippy::struct_excessive_bools)]
-#[derive(StructOpt, Debug, Default)]
+#[derive(StructOpt, Debug, Default, Clone)]
 #[structopt(name = "rust-nix-templater")]
 pub struct Options {
     /// Create a desktop file.
@@ -103,7 +103,7 @@ impl Display for CiTypeParseError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CiType {
     Github,
     Gitlab,
@@ -134,7 +134,7 @@ impl Display for RustToolchainChannelParseError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum RustToolchainChannel {
     Stable,
     Beta,
