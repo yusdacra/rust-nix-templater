@@ -1,6 +1,6 @@
 [package]
 name = "rust-nix-templater"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["Yusuf Bera Ertan <y.bera003.06@protonmail.com>"]
 edition = "2018"
 license = "MIT"
