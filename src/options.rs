@@ -51,10 +51,6 @@ pub struct Options {
     /// Whether to copy libraries to package output.
     #[structopt(short = "L", long = "library")]
     pub package_lib: bool,
-    /// Name of the executable `cargo build` generates.
-    /// Required if your package's executable name is different from your package's name.
-    #[structopt(short = "e", long = "executable")]
-    pub package_executable: Option<String>,
 
     /// Icon to use in the generated desktop file. [example: --icon assets/icon.ico]
     #[structopt(long = "icon")]
@@ -72,9 +68,6 @@ pub struct Options {
     #[structopt(long = "xdg-categories")]
     pub package_xdg_categories: Option<String>,
 
-    /// Use the `rust-toolchain` file instead of a channel.
-    #[structopt(short = "T", long = "use-toolchain-file")]
-    pub rust_toolchain_file: bool,
     /// Rust toolchain channel to use. [example: -t nightly]
     #[structopt(short = "t", long = "toolchain", default_value = "stable")]
     pub rust_toolchain_channel: RustToolchainChannel,

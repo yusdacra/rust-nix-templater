@@ -58,22 +58,6 @@ make_test! {
 }
 
 make_test! {
-    with_toolchain_file;
-    rust_toolchain_file: true,
-}
-
-make_test! {
-    with_executable;
-    package_executable: Some(String::from("testg")),
-}
-
-make_test! {
-    toolchain_file_channel;
-    rust_toolchain_channel: RustToolchainChannel::Nightly,
-    rust_toolchain_file: true,
-}
-
-make_test! {
     cachix_no_key;
     cachix_name: Some(String::from("test")),
 }

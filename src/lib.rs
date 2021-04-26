@@ -194,11 +194,11 @@ pub fn run_with_options(options: Options, print_msg: bool) -> anyhow::Result<()>
         }
     }
 
-    let parent = index.is_some().then(|| "package").unwrap_or("workspace");
+    let parent = index.map_or("workspace", |_| "package");
 
     cargo_toml.push(format!("\n[{}.metadata.nix]", parent));
     cargo_toml.push("# Toggle app flake output".to_owned());
-    cargo_toml.kv("app", !options.disable_app);
+    cargo_toml.kv("app", !options.disable_app && !options.disable_build);
     cargo_toml.push("# Toggle flake outputs that build (checks, package and app)".to_owned());
     cargo_toml.kv("build", !options.disable_build);
     cargo_toml.push("# Whether to copy built library to package output".to_owned());
@@ -206,11 +206,7 @@ pub fn run_with_options(options: Options, print_msg: bool) -> anyhow::Result<()>
     if let Some(long_description) = &options.package_long_description {
         cargo_toml.kv("longDescription", quote(long_description));
     }
-    if let Some(executable) = &options.package_executable {
-        cargo_toml.push("# Executable name to be used for app output".to_owned());
-        cargo_toml.kv("executable", quote(executable));
-    }
-    if !options.rust_toolchain_file {
+    if options.rust_toolchain_channel != options::RustToolchainChannel::default() {
         cargo_toml.push("# Toolchain to be used".to_owned());
         cargo_toml.kv("toolchain", quote(options.rust_toolchain_channel));
     }
