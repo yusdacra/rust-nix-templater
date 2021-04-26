@@ -9,6 +9,7 @@
 
   outputs = inputs: inputs.nixCargoIntegration.lib.makeOutputs {
     root = ./.;
+    buildPlatform = "crate2nix";
     overrides = {
       common = prev: {
         env = prev.env // {
