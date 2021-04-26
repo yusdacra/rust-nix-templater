@@ -30,27 +30,9 @@ rust-nix-templater -l mit -n example
 rust-nix-templater --license mit --name example
 ```
 
-This will generate files in the current directory, with license set to `mit` and package name set to `example`. It will generate both build and development environment files that have a binary package, using Rust's `stable` toolchain. If the current directory doesn't already have a Cargo project, this will create one.
-
-For a project that uses `rust-toolchain` file:
-
-```ShellSession
-rust-nix-templater -T -l mit -n example
-# is equal to
-rust-nix-templater --use-toolchain-file -l mit -n example
-```
-
-This will do what the previous examples does plus use `rust-toolchain` file instead of Rust's `stable` toolchain.
-
-For a project that uses `rust-toolchain` file, but is only a library:
-
-```ShellSession
-rust-nix-templater -LT -l mit -n example
-# is equal to
-rust-nix-templater --library -T -l mit -n example
-```
-
-This will do what the previous example does but it won't generate a binary package (which means it also won't generate a Flake application).
+This will generate files in the current directory, with license set to `mit` and package name set to `example`.
+It will generate both build and development environment files that have a binary package, using Rust's `stable` toolchain.
+If the current directory doesn't already have a Cargo project, this will create one.
 
 For a project that uses `beta` toolchain and is hosted on GitHub:
 
@@ -74,14 +56,13 @@ USAGE:
     rust-nix-templater [FLAGS] [OPTIONS]
 
 FLAGS:
-    -A, --no-app                Whether to disable app output for flake
-        --disable-build         Disable app / builds flake output generation
-        --github-ci             Enable GitHub Actions file generation
-        --gitlab-ci             Enable GitLab CI file generation
-        --help                  Prints help information
-    -L, --library               Whether to copy libraries to package output
-    -T, --use-toolchain-file    Use the `rust-toolchain` file instead of a channel
-    -V, --version               Prints version information
+    -A, --no-app           Whether to disable app output for flake
+        --disable-build    Disable app / builds flake output generation
+        --github-ci        Enable GitHub Actions file generation
+        --gitlab-ci        Enable GitLab CI file generation
+        --help             Prints help information
+    -L, --library          Whether to copy libraries to package output
+    -V, --version          Prints version information
 
 OPTIONS:
         --cachix-name <cachix-name>                      Cachix cache name. [example: --cachix-name rust-nix-templater]
@@ -92,9 +73,6 @@ OPTIONS:
             Output directory where generated files will be put in. [example: -o example] [default: .]
 
     -d, --description <package-description>              A short, single line description of the package
-    -e, --executable <package-executable>
-            Name of the executable `cargo build` generates. Required if your package's executable name is different from
-            your package's name
     -h, --homepage <package-homepage>
             Homepage of the package. [example: -h "https://gitlab.com/example/example"]
 
