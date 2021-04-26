@@ -10,4 +10,4 @@ after_script:
 check:
   stage: build
   script:
-    - nix flake check -L --show-trace
+    - nix develop -c check
