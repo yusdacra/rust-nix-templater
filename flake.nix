@@ -5,18 +5,14 @@
       url = "github:yusdacra/nix-cargo-integration";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    flakeCompat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
   };
 
   outputs = inputs: inputs.nixCargoIntegration.lib.makeOutputs {
     root = ./.;
     buildPlatform = "crate2nix";
-    overrides = {
-      common = prev: {
-        env = prev.env // {
-          TEMPLATER_FMT_BIN = "${prev.pkgs.nixpkgs-fmt}/bin/nixpkgs-fmt";
-          TEMPLATER_CARGO_BIN = "${prev.pkgs.rustc}/bin/cargo";
-        };
-      };
-    };
   };
 }

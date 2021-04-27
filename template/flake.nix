@@ -5,10 +5,17 @@
       url = "github:yusdacra/nix-cargo-integration";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    flakeCompat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
   };
 
   outputs = inputs: inputs.nixCargoIntegration.lib.makeOutputs {
     root = ./.;
+    # The build platform that will be used for anything build related.
+    # Available platforms are "naersk" and "crate2nix".
+    buildPlatform = "naersk";
     # Overrides provided here will apply to *every crate*,
     # for *every system*. To selectively override per crate,
     # one can use `common.cargoPkg.name` attribute. To selectively
@@ -32,7 +39,7 @@
           # overlays = prev.overlays ++ [ inputs.someInput.someOverlay ];
         };
         # Override crate overrides used by crate2nix build derivation.
-        crateOverrides = common: prev: {
+        crateOverrides = common: prevv: {
           # test = prev: {
           #   buildInputs = (prev.buildInputs or []) ++ [ common.pkgs.hello ];
           #   TEST_ENV = "test";
