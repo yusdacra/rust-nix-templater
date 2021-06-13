@@ -17,6 +17,7 @@ macro_str! {
     FLAKE, "flake.nix";
     DEFAULT, "default.nix";
     SHELL, "shell.nix";
+    COMPAT, "compat.nix";
     GITIGNORE, "gitignore";
     ENVRC, ".envrc";
 }
@@ -24,6 +25,7 @@ macro_str! {
 include_template_files! {
     DEFAULT!(),
     SHELL!(),
+    COMPAT!(),
     ENVRC!(),
     GITIGNORE!(),
     FLAKE!(),
@@ -73,10 +75,16 @@ pub fn run_with_options(options: Options, print_msg: bool) -> anyhow::Result<()>
     if print_msg {
         println!("💾 Writing files...");
     }
-    let mut rendered_files =
-        std::array::IntoIter::new([FLAKE!(), SHELL!(), GITIGNORE!(), ENVRC!(), DEFAULT!()])
-            .map(|name| (name, get_string!(name).to_owned()))
-            .collect::<Vec<_>>();
+    let mut rendered_files = std::array::IntoIter::new([
+        FLAKE!(),
+        SHELL!(),
+        GITIGNORE!(),
+        ENVRC!(),
+        DEFAULT!(),
+        COMPAT!(),
+    ])
+    .map(|name| (name, get_string!(name).to_owned()))
+    .collect::<Vec<_>>();
 
     let cachix_name = &options.cachix_name;
     let mut cachix_render = |replacement: &str, filename| {
