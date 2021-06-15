@@ -1,6 +1,6 @@
 # rust-nix-templater
 
-Generates Rust projects which use [nix-cargo-integration](https://github.com/yusdacra/nix-cargo-integration).
+Generates Rust projects which use [nix-cargo-integration].
 
 ## Features
 
@@ -13,6 +13,7 @@ Generates Rust projects which use [nix-cargo-integration](https://github.com/yus
 - Desktop file generation
 - CI file generation (GitHub Actions and GitLab CI)
 - Creates Cargo project if one is not found in output directory
+- See [nix-cargo-integration] for more information.
 
 ## Installation
 
@@ -136,3 +137,4 @@ nix flake check
 This will build and test the `rust-nix-templater-tests` attribute (which also runs Cargo tests).
 
 [devshell]: https://github.com/numtide/devshell "devshell"
+[nix-cargo-integration]: https://github.com/yusdacra/nix-cargo-integration "nix-cargo-integration"
