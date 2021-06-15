@@ -9,7 +9,7 @@ pub use options::Options;
 pub use structopt::StructOpt;
 
 use anyhow::bail;
-use std::fmt::Display;
+use std::{fmt::Display, ops::Not};
 
 macro_str! {
     GITHUB_CI, ".github/workflows/nix.yml";
@@ -158,42 +158,51 @@ pub fn run_with_options(options: Options, should_print_msg: bool) -> anyhow::Res
         }
     }
 
-    let mut cargo_toml = std::fs::read_to_string(&cargo_toml_path)?
-        .lines()
-        .map(str::to_string)
-        .collect::<Vec<_>>();
+    let mut cargo_toml = std::fs::read_to_string(&cargo_toml_path)?;
 
-    let index = cargo_toml
-        .iter()
-        .position(|line| line.contains("name = "))
-        .map(|i| i + 1);
+    let index = cargo_toml.find("name = ");
 
     if let Some(mut index) = index {
-        if !cargo_toml.iter().any(|line| line.contains("license = ")) {
+        if cargo_toml.contains("license = ").not() {
             if let Some(license) = &options.package_license {
-                cargo_toml.insert(index, format!("license = \"{}\"", license));
-                index += 1;
+                const LICENSE_KEY: &str = "license = \"";
+                const LICENSE_KEY_END: &str = "\"\n";
+
+                cargo_toml.insert_str(index, LICENSE_KEY);
+                index += LICENSE_KEY.len();
+                cargo_toml.insert_str(index, license);
+                index += license.len();
+                cargo_toml.insert_str(index, LICENSE_KEY_END);
+                index += LICENSE_KEY_END.len();
             }
         }
-        if !cargo_toml
-            .iter()
-            .any(|line| line.contains("description = "))
-        {
+        if cargo_toml.contains("description = ").not() {
             if let Some(description) = &options.package_description {
-                cargo_toml.insert(index, format!("description = \"{}\"", description));
+                const DESC_KEY: &str = "description = \"";
+                const DESC_KEY_END: &str = "\"\n";
+
+                cargo_toml.insert_str(index, DESC_KEY);
+                index += DESC_KEY.len();
+                cargo_toml.insert_str(index, description);
+                index += description.len();
+                cargo_toml.insert_str(index, DESC_KEY_END);
             }
         }
     }
 
     let parent = index.map_or("workspace", |_| "package");
 
+    cargo_toml.push('\n');
     cargo_toml.attrset(format!("{}.metadata.nix", parent));
     cargo_toml.comment("Toggle app flake output");
-    cargo_toml.kv("app", !options.disable_app && !options.disable_build);
+    cargo_toml.kv(
+        "app",
+        (options.disable_app.not() && options.disable_build.not()).to_str(),
+    );
     cargo_toml.comment("Toggle flake outputs that build (checks, package and app)");
-    cargo_toml.kv("build", !options.disable_build);
+    cargo_toml.kv("build", options.disable_build.not().to_str());
     cargo_toml.comment("Whether to copy built library to package output");
-    cargo_toml.kv("library", options.package_lib);
+    cargo_toml.kv("library", options.package_lib.to_str());
     if let Some(long_description) = &options.package_long_description {
         cargo_toml.kv("longDescription", quote(long_description));
     }
@@ -233,15 +242,7 @@ pub fn run_with_options(options: Options, should_print_msg: bool) -> anyhow::Res
             cargo_toml.kv("icon", quote(icon));
         }
     }
-    let new_cargo_toml = cargo_toml
-        .into_iter()
-        .map(|mut c| {
-            c.reserve(1);
-            c.push('\n');
-            c
-        })
-        .collect::<String>();
-    std::fs::write(&cargo_toml_path, new_cargo_toml.into_bytes())?;
+    std::fs::write(&cargo_toml_path, cargo_toml.into_bytes())?;
 
     print_msg("🎉 Finished!");
 
@@ -249,22 +250,54 @@ pub fn run_with_options(options: Options, should_print_msg: bool) -> anyhow::Res
 }
 
 trait TomlExt {
-    fn kv(&mut self, key: impl Display, value: impl Display);
-    fn comment(&mut self, comment: impl Display);
-    fn attrset(&mut self, name: impl Display);
+    fn kv(&mut self, key: impl AsRef<str>, value: impl AsRef<str>);
+    fn comment(&mut self, comment: impl AsRef<str>);
+    fn attrset(&mut self, name: impl AsRef<str>);
 }
 
-impl TomlExt for Vec<String> {
-    fn kv(&mut self, key: impl Display, value: impl Display) {
-        self.push(format!("{} = {}", key, value));
+impl TomlExt for String {
+    fn kv(&mut self, key: impl AsRef<str>, value: impl AsRef<str>) {
+        let key = key.as_ref();
+        let value = value.as_ref();
+
+        self.reserve(key.len() + value.len() + 4);
+        self.push_str(key);
+        self.push_str(" = ");
+        self.push_str(value);
+        self.push('\n');
     }
 
-    fn comment(&mut self, comment: impl Display) {
-        self.push(format!("# {}", comment));
+    fn comment(&mut self, comment: impl AsRef<str>) {
+        let comment = comment.as_ref();
+
+        self.reserve(comment.len() + 3);
+        self.push_str("# ");
+        self.push_str(comment);
+        self.push('\n');
     }
 
-    fn attrset(&mut self, name: impl Display) {
-        self.push(format!("[{}]", name));
+    fn attrset(&mut self, name: impl AsRef<str>) {
+        let name = name.as_ref();
+
+        self.reserve(name.len() + 3);
+        self.push('[');
+        self.push_str(name);
+        self.push(']');
+        self.push('\n');
+    }
+}
+
+trait BoolExt {
+    fn to_str(&self) -> &'static str;
+}
+
+impl BoolExt for bool {
+    fn to_str(&self) -> &'static str {
+        if *self {
+            "true"
+        } else {
+            "false"
+        }
     }
 }
 
