@@ -49,32 +49,31 @@ after_script:
   - . /bin/post-build.sh
 ";
 
-pub fn run_with_options(options: Options, print_msg: bool) -> anyhow::Result<()> {
+/// Run with options.
+///
+/// # Errors
+/// Will error if any IO error occurs, or if the passed options are invalid.
+pub fn run_with_options(options: Options, should_print_msg: bool) -> anyhow::Result<()> {
     let out_dir = options.out_dir;
     let cargo_toml_path = out_dir.join("Cargo.toml");
     let has_project = cargo_toml_path.exists();
+    let print_msg = |msg: &str| {
+        if should_print_msg {
+            println!("{}", msg)
+        }
+    };
 
     if has_project {
-        if print_msg {
-            println!("- Existing Cargo project detected.")
-        }
+        print_msg("- Existing Cargo project detected.");
     } else {
-        if print_msg {
-            println!("- No Cargo project detected.");
-        }
+        print_msg("- No Cargo project detected.");
         if options.package_name.is_none() {
-            if print_msg {
-                println!(
-                    "  - You must pass a project name while creating a Cargo project, aborting."
-                );
-            }
+            print_msg("  - You must pass a project name while creating a Cargo project, aborting.");
             bail!("must set a project name while creating a cargo project");
         }
     }
 
-    if print_msg {
-        println!("💾 Writing files...");
-    }
+    print_msg("💾 Writing files...");
     let mut rendered_files = std::array::IntoIter::new([
         FLAKE!(),
         SHELL!(),
@@ -108,30 +107,22 @@ pub fn run_with_options(options: Options, print_msg: bool) -> anyhow::Result<()>
 
     write_files(out_dir.as_path(), rendered_files)?;
 
-    if print_msg {
-        println!("  - Formatting files...");
-    }
+    print_msg("  - Formatting files...");
     let fmt_bin = option_env!("TEMPLATER_FMT_BIN").unwrap_or("nixpkgs-fmt");
     match std::process::Command::new(fmt_bin).arg(&out_dir).output() {
         Ok(_) => {
-            if print_msg {
-                println!("  - Format successful: used `{}`", fmt_bin)
-            }
+            print_msg(&format!("  - Format successful: used `{}`", fmt_bin));
         }
         Err(err) => {
-            if print_msg {
-                println!(
-                    "  - Failed to format: error while running `{}`: {}",
-                    fmt_bin, err
-                )
-            }
+            print_msg(&format!(
+                "  - Failed to format: error while running `{}`: {}",
+                fmt_bin, err
+            ));
         }
     }
 
     if !has_project {
-        if print_msg {
-            println!("  - Creating new Cargo project...");
-        }
+        print_msg("  - Creating new Cargo project...");
         let cargo_bin = option_env!("TEMPLATER_CARGO_BIN").unwrap_or("cargo");
         match std::process::Command::new(cargo_bin)
             .arg("init")
@@ -139,12 +130,10 @@ pub fn run_with_options(options: Options, print_msg: bool) -> anyhow::Result<()>
             .output()
         {
             Ok(_) => {
-                if print_msg {
-                    println!(
-                        "  - Created Cargo project successfully: used `{}`",
-                        cargo_bin
-                    );
-                }
+                print_msg(&format!(
+                    "  - Created Cargo project successfully: used `{}`",
+                    cargo_bin
+                ));
                 match std::process::Command::new(cargo_bin)
                     .arg("generate-lockfile")
                     .arg("--manifest-path")
@@ -152,24 +141,18 @@ pub fn run_with_options(options: Options, print_msg: bool) -> anyhow::Result<()>
                     .output()
                 {
                     Ok(_) => {
-                        if print_msg {
-                            println!("    - Generated Cargo lockfile successfully")
-                        }
+                        print_msg("    - Generated Cargo lockfile successfully");
                     }
                     Err(err) => {
-                        if print_msg {
-                            println!("    - Failed to generate Cargo lockfile: {}", err)
-                        }
+                        print_msg(&format!("    - Failed to generate Cargo lockfile: {}", err));
                     }
                 }
             }
             Err(err) => {
-                if print_msg {
-                    println!(
-                        "  - Failed to create Cargo project: error while running `{}`: {}",
-                        cargo_bin, err
-                    );
-                }
+                print_msg(&format!(
+                    "  - Failed to create Cargo project: error while running `{}`: {}",
+                    cargo_bin, err
+                ));
                 bail!("failed to create cargo project: {}", err);
             }
         }
@@ -204,26 +187,26 @@ pub fn run_with_options(options: Options, print_msg: bool) -> anyhow::Result<()>
 
     let parent = index.map_or("workspace", |_| "package");
 
-    cargo_toml.push(format!("\n[{}.metadata.nix]", parent));
-    cargo_toml.push("# Toggle app flake output".to_owned());
+    cargo_toml.attrset(format!("{}.metadata.nix", parent));
+    cargo_toml.comment("Toggle app flake output");
     cargo_toml.kv("app", !options.disable_app && !options.disable_build);
-    cargo_toml.push("# Toggle flake outputs that build (checks, package and app)".to_owned());
+    cargo_toml.comment("Toggle flake outputs that build (checks, package and app)");
     cargo_toml.kv("build", !options.disable_build);
-    cargo_toml.push("# Whether to copy built library to package output".to_owned());
+    cargo_toml.comment("Whether to copy built library to package output");
     cargo_toml.kv("library", options.package_lib);
     if let Some(long_description) = &options.package_long_description {
         cargo_toml.kv("longDescription", quote(long_description));
     }
     if options.rust_toolchain_channel != options::RustToolchainChannel::default() {
-        cargo_toml.push("# Toolchain to be used".to_owned());
+        cargo_toml.comment("Toolchain to be used");
         cargo_toml.kv("toolchain", quote(options.rust_toolchain_channel));
     }
     if let Some(cachix_name) = &options.cachix_name {
-        cargo_toml.push(format!("\n[{}.metadata.nix.cachix]", parent));
-        cargo_toml.push("# Name of the cachix binary cache".to_owned());
+        cargo_toml.attrset(format!("{}.metadata.nix.cachix", parent));
+        cargo_toml.comment("Name of the cachix binary cache");
         cargo_toml.kv("name", quote(cachix_name));
         if let Some(cachix_key) = &options.cachix_public_key {
-            cargo_toml.push("# Public key of this cache".to_owned());
+            cargo_toml.comment("Public key of this cache");
             cargo_toml.kv("key", quote(cachix_key));
         }
     }
@@ -233,7 +216,7 @@ pub fn run_with_options(options: Options, print_msg: bool) -> anyhow::Result<()>
         || options.package_xdg_comment.is_some()
         || options.package_icon.is_some()
     {
-        cargo_toml.push(format!("\n[{}.metadata.nix.desktopFile]", parent));
+        cargo_toml.attrset(format!("{}.metadata.nix.desktopFile", parent));
         if let Some(desktop_name) = &options.package_xdg_desktop_name {
             cargo_toml.kv("name", quote(desktop_name));
         }
@@ -260,20 +243,28 @@ pub fn run_with_options(options: Options, print_msg: bool) -> anyhow::Result<()>
         .collect::<String>();
     std::fs::write(&cargo_toml_path, new_cargo_toml.into_bytes())?;
 
-    if print_msg {
-        println!("🎉 Finished!");
-    }
+    print_msg("🎉 Finished!");
 
     Ok(())
 }
 
 trait TomlExt {
     fn kv(&mut self, key: impl Display, value: impl Display);
+    fn comment(&mut self, comment: impl Display);
+    fn attrset(&mut self, name: impl Display);
 }
 
 impl TomlExt for Vec<String> {
     fn kv(&mut self, key: impl Display, value: impl Display) {
         self.push(format!("{} = {}", key, value));
+    }
+
+    fn comment(&mut self, comment: impl Display) {
+        self.push(format!("# {}", comment));
+    }
+
+    fn attrset(&mut self, name: impl Display) {
+        self.push(format!("[{}]", name));
     }
 }
 

@@ -22,7 +22,7 @@ macro_rules! make_test {
                 package_name: Some("test".to_owned()),
                 ..Options::default()
             }, false).unwrap();
-            let _ = std::fs::remove_dir_all(out_dir);
+            drop(std::fs::remove_dir_all(out_dir));
         }
     };
 }
