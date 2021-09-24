@@ -40,11 +40,11 @@
         "rustOverlay": "rustOverlay"
       },
       "locked": {
-        "lastModified": 1632505522,
-        "narHash": "sha256-X32MjCiW1aAOPihhU4T9GhIHCw+ilbTkpnAKe3b9IuM=",
+        "lastModified": 1632511779,
+        "narHash": "sha256-EAvZ1XeTBHnyDB77bqLiv83ndkGDhT5+z376XjA0KJA=",
         "owner": "yusdacra",
         "repo": "nix-cargo-integration",
-        "rev": "ddf20a685f1c52802ffd6ecb04bc62071ef200b6",
+        "rev": "4dfdb0ee9025e56d0548f7fecd098b080b8af780",
         "type": "github"
       },
       "original": {
