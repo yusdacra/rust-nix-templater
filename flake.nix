@@ -2,7 +2,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     nixCargoIntegration = {
-      url = "github:yusdacra/nix-cargo-integration";
+      url = "github:yusdacra/nix-cargo-integration/feat/extra-toolchain-components";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     flakeCompat = {
@@ -14,5 +14,6 @@
   outputs = inputs: inputs.nixCargoIntegration.lib.makeOutputs {
     root = ./.;
     buildPlatform = "naersk";
+    extraToolchainComponents = [ "rust-src" "clippy" "rustfmt" ];
   };
 }
