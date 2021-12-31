@@ -10,7 +10,7 @@
   outputs = inputs: inputs.nixCargoIntegration.lib.makeOutputs {
     root = ./.;
     # The build platform that will be used for anything build related.
-    # Available platforms are "naersk" and "crate2nix".
+    # Available platforms are "naersk", "crate2nix" and "buildRustPackage".
     buildPlatform = "naersk";
     # Which package outputs to rename to what.
     # This renames both their package names and the generated output names.
@@ -49,12 +49,13 @@
         # Note that it may cause inconsistency if the changed root includes different
         # dependencies in it's Cargo.lock.
         root = common: prev: prev;
-        # Override crate overrides used by crate2nix build derivation.
+        # Provide extra crate overrides.
         crateOverrides = common: prevv: {
           # test = prev: {
           #   buildInputs = (prev.buildInputs or []) ++ [ common.pkgs.hello ];
           #   TEST_ENV = "test";
           # }
+          # You can also override your main crate by using it's name, like above.
         };
         # Common attribute overrides.
         common = prev: {
@@ -126,12 +127,6 @@
           runTests = prev.runTests;
           };
         */
-        # Override main build derivation of naersk / crate2nix.
-        mainBuild = common: prev: {
-          buildInputs = (prev.buildInputs or [ ]) ++ [ ];
-          # You can add environment variables like so:
-          # TEST_ENV = "test";
-        };
       };
   };
 }
