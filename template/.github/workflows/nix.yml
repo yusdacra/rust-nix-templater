@@ -11,9 +11,8 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
     - name: Install nix
-      uses: cachix/install-nix-action@v13
+      uses: cachix/install-nix-action@v16
       with:
-        install_url: https://github.com/numtide/nix-unstable-installer/releases/download/nix-2.4pre20210604_8e6ee1b/install
         extra_nix_config: |
           experimental-features = nix-command flakes
         nix_path: nixpkgs=channel:nixos-unstable
@@ -22,5 +21,5 @@ jobs:
       with:
         name: cachix_name
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-    - name: Tests
-      run: nix develop -c check
+    - name: Build
+      run: nix build .
