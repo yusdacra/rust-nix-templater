@@ -201,8 +201,6 @@ pub fn run_with_options(options: Options, should_print_msg: bool) -> anyhow::Res
     );
     cargo_toml.comment("Toggle flake outputs that build (checks, package and app)");
     cargo_toml.kv("build", options.disable_build.not().to_str());
-    cargo_toml.comment("Whether to copy built library to package output");
-    cargo_toml.kv("library", options.package_lib.to_str());
     if let Some(long_description) = &options.package_long_description {
         cargo_toml.kv("longDescription", quote(long_description));
     }

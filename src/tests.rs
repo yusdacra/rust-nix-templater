@@ -67,14 +67,3 @@ make_test! {
     wrong_toolchain_channel;
     rust_toolchain_channel: RustToolchainChannel::from_str("definitely invalid channel").unwrap(),
 }
-
-make_test! {
-    lib_package;
-    package_lib: true,
-}
-
-make_test! {
-    lib_package_desktop;
-    package_lib: true,
-    package_xdg_desktop_name: Some("name".to_string()),
-}

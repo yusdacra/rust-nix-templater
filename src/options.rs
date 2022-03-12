@@ -48,9 +48,6 @@ pub struct Options {
     /// Whether to disable app output for flake.
     #[structopt(short = "A", long = "no-app")]
     pub disable_app: bool,
-    /// Whether to copy libraries to package output.
-    #[structopt(short = "L", long = "library")]
-    pub package_lib: bool,
 
     /// Icon to use in the generated desktop file. [example: --icon assets/icon.ico]
     #[structopt(long = "icon")]
