@@ -1,0 +1,3 @@
+tasks:
+  - init: echo "entering dev env"
+    command: nix develop
