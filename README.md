@@ -1,15 +1,11 @@
 # rust-nix-templater
 
-Generates Rust projects which use [nix-cargo-integration].
+Generates Rust projects that use [nix-cargo-integration].
 
 ## Features
 
-- One place for configuration; Cargo.toml
-- Generate for applications or libraries
 - Support for both flakes and legacy nix
-- Generates release, debug and test packages
 - Cachix support
-- Generates development shell (uses [devshell], supports top-level `devshell.toml` file)
 - Desktop file generation
 - CI file generation (GitHub Actions and GitLab CI)
 - Creates Cargo project if one is not found in output directory
@@ -17,8 +13,9 @@ Generates Rust projects which use [nix-cargo-integration].
 
 ## Installation
 
+Run without installing by executing `nix run github:yusdacra/rust-nix-templater -- --help`.
+
 - Flakes: `nix profile install github:yusdacra/rust-nix-templater`
-    - Or run without installing: `nix run github:yusdacra/rust-nix-templater`
 - Legacy: `nix-env -i -f "https://github.com/yusdacra/rust-nix-templater/tarball/master"`
 
 ## Examples
@@ -50,7 +47,7 @@ For more options please check `rust-nix-templater --help`.
 ## Usage
 
 ```
-rust-nix-templater 0.2.3
+rust-nix-templater 0.2.5
 Generates Nix files for Rust projects which uses naersk
 
 USAGE:
@@ -62,7 +59,6 @@ FLAGS:
         --github-ci        Enable GitHub Actions file generation
         --gitlab-ci        Enable GitLab CI file generation
         --help             Prints help information
-    -L, --library          Whether to copy libraries to package output
     -V, --version          Prints version information
 
 OPTIONS:
