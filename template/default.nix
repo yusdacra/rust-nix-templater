@@ -1,1 +1,1 @@
-(import ./compat.nix { src = ./.; }).defaultNix.default
+(import ./compat.nix {src = ./.;}).defaultNix.default

@@ -11,7 +11,8 @@
     };
   };
 
-  outputs = inputs: inputs.nixCargoIntegration.lib.makeOutputs {
-    root = ./.;
-  };
+  outputs = inputs:
+    inputs.nixCargoIntegration.lib.makeOutputs {
+      root = ./.;
+    };
 }
