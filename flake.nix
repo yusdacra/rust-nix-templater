@@ -14,6 +14,7 @@
   outputs = inputs:
     inputs.nixCargoIntegration.lib.makeOutputs {
       root = ./.;
+      builder = "buildRustPackage";
       overrides.crates = common: _: {
         rust-nix-templater = _: let
           env = {
