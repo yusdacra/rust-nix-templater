@@ -1,8 +1,8 @@
 [package]
 name = "rust-nix-templater"
-version = "0.2.5"
+version = "0.3.1"
 authors = ["Yusuf Bera Ertan <y.bera003.06@protonmail.com>"]
-edition = "2018"
+edition = "2021"
 license = "MIT"
 description = "Generates Nix files for Rust applications."
 repository = "https://github.com/yusdacra/rust-nix-templater"
@@ -12,7 +12,7 @@ categories = ["command-line-utilities"]
 
 [dependencies]
 structopt = "0.3"
-anyhow = "1.0"
+anyhow = {version = "1.0", features = ["backtrace"]}
 
 [profile.release]
 # Since we don't have any performance need, we optimize for size

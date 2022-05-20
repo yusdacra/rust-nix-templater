@@ -9,12 +9,12 @@ pub use options::Options;
 pub use structopt::StructOpt;
 
 use anyhow::bail;
-use std::{fmt::Display, ops::Not};
+use std::{fmt::Display, ops::Not, process::Command};
 
 macro_str! {
     GITHUB_CI, ".github/workflows/nix.yml";
     GITLAB_CI, ".gitlab-ci.yml";
-    FLAKE, "flake.nix";
+    FLAKE, concat!(env!("NCI_SRC"), "/docs/example_flake.nix");
     DEFAULT, "default.nix";
     SHELL, "shell.nix";
     COMPAT, "compat.nix";
@@ -28,10 +28,21 @@ include_template_files! {
     COMPAT!(),
     ENVRC!(),
     GITIGNORE!(),
-    FLAKE!(),
     GITHUB_CI!(),
     GITLAB_CI!(),
 }
+
+#[cfg(test)]
+const BASE_FILES: [&str; 6] = [
+    "flake.nix",
+    SHELL!(),
+    GITIGNORE!(),
+    ENVRC!(),
+    DEFAULT!(),
+    COMPAT!(),
+];
+
+const FLAKE_CONTENTS: &str = include_str!(FLAKE!());
 
 const GITHUB_CACHIX: &str = r"    - name: Cachix cache
       uses: cachix/cachix-action@v10
@@ -74,16 +85,12 @@ pub fn run_with_options(options: Options, should_print_msg: bool) -> anyhow::Res
     }
 
     print_msg("💾 Writing files...");
-    let mut rendered_files = std::array::IntoIter::new([
-        FLAKE!(),
-        SHELL!(),
-        GITIGNORE!(),
-        ENVRC!(),
-        DEFAULT!(),
-        COMPAT!(),
-    ])
-    .map(|name| (name, get_string!(name).to_owned()))
-    .collect::<Vec<_>>();
+    let mut rendered_files = [SHELL!(), GITIGNORE!(), ENVRC!(), DEFAULT!(), COMPAT!()]
+        .into_iter()
+        .map(|name| (name, get_string!(name).to_owned()))
+        .collect::<Vec<_>>();
+
+    rendered_files.push(("flake.nix", FLAKE_CONTENTS.to_string()));
 
     let cachix_name = &options.cachix_name;
     let mut cachix_render = |replacement: &str, filename| {
@@ -109,7 +116,7 @@ pub fn run_with_options(options: Options, should_print_msg: bool) -> anyhow::Res
 
     print_msg("  - Formatting files...");
     let fmt_bin = option_env!("TEMPLATER_FMT_BIN").unwrap_or("nixpkgs-fmt");
-    match std::process::Command::new(fmt_bin).arg(&out_dir).output() {
+    match Command::new(fmt_bin).arg(&out_dir).output() {
         Ok(_) => {
             print_msg(&format!("  - Format successful: used `{}`", fmt_bin));
         }
@@ -124,17 +131,13 @@ pub fn run_with_options(options: Options, should_print_msg: bool) -> anyhow::Res
     if !has_project {
         print_msg("  - Creating new Cargo project...");
         let cargo_bin = option_env!("TEMPLATER_CARGO_BIN").unwrap_or("cargo");
-        match std::process::Command::new(cargo_bin)
-            .arg("init")
-            .arg(&out_dir)
-            .output()
-        {
+        match Command::new(cargo_bin).arg("init").arg(&out_dir).output() {
             Ok(_) => {
                 print_msg(&format!(
                     "  - Created Cargo project successfully: used `{}`",
                     cargo_bin
                 ));
-                match std::process::Command::new(cargo_bin)
+                match Command::new(cargo_bin)
                     .arg("generate-lockfile")
                     .arg("--manifest-path")
                     .arg(&cargo_toml_path)
