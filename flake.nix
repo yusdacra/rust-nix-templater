@@ -26,6 +26,9 @@
           app = "rust-nix-templater";
           package = "rust-nix-templater";
         };
+        shell = {
+          packages = [common.pkgs.treefmt];
+        };
       };
       pkgConfig = common: {
         rust-nix-templater = {
