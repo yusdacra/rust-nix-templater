@@ -29,25 +29,25 @@ rust-nix-templater --license mit --name example
 ```
 
 This will generate files in the current directory, with license set to `mit` and package name set to `example`.
-It will generate both build and development environment files that have a binary package, using Rust's `stable` toolchain.
+It will generate both build and development environment files.
 If the current directory doesn't already have a Cargo project, this will create one.
 
-For a project that uses `beta` toolchain and is hosted on GitHub:
+For a project that is hosted on GitHub:
 
 ```ShellSession
-rust-nix-templater --github-ci -t beta -l mit -n example
+rust-nix-templater --github-ci -l mit -n example
 # is equal to
-rust-nix-templater --github-ci --toolchain beta -l mit -n example
+rust-nix-templater --github-ci -l mit -n example
 ```
 
-This will do what the first example does, but use `beta` toolchain and also generate a GitHub Actions workflow.
+This will do what the first example does and also generate a GitHub Actions workflow.
 
 For more options please check `rust-nix-templater --help`.
 
 ## Usage
 
 ```
-rust-nix-templater 0.2.5
+rust-nix-templater 0.4.0
 Generates Nix files for Rust projects which uses naersk
 
 USAGE:
@@ -97,9 +97,6 @@ OPTIONS:
             "Icy Matrix"]
         --xdg-generic-name <package-xdg-generic-name>
             Generic name to put in the generated desktop file. [example: --xdg-generic-name "Matrix Client"]
-
-    -t, --toolchain <rust-toolchain-channel>
-            Rust toolchain channel to use. [example: -t nightly] [default: stable]
 ```
 
 ## Development
@@ -111,7 +108,7 @@ The Nix flake provides two main build types: release and debug, akin to the Carg
 For debugging, build with debug symbols, but don't test:
 
 ```ShellSession
-nix build .#rust-nix-templater-debug
+nix build .#rust-nix-templater-dev
 ```
 
 For release, which compiles in Cargo release mode:

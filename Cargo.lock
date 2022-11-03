@@ -198,7 +198,7 @@ dependencies = [
 
 [[package]]
 name = "rust-nix-templater"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "anyhow",
  "structopt",
