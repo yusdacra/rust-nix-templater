@@ -1,12 +1,7 @@
-use crate::{
-    make_test,
-    options::{Options, RustToolchainChannel},
-    run_with_options,
-};
+use crate::{make_test, options::Options, run_with_options};
 use std::{
     ops::Not,
     path::{Path, PathBuf},
-    str::FromStr,
 };
 
 fn pass(_: &Path) -> bool {
@@ -113,17 +108,6 @@ make_test! {
 }
 
 make_test! {
-    name: with_toolchain;
-    rust_toolchain_channel: RustToolchainChannel::Nightly,
-}
-
-make_test! {
     name: cachix_no_key;
     cachix_name: Some(String::from("test")),
-}
-
-make_test! {
-    #[should_panic]
-    name: wrong_toolchain_channel;
-    rust_toolchain_channel: RustToolchainChannel::from_str("definitely invalid channel").unwrap(),
 }

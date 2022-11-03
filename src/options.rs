@@ -1,8 +1,4 @@
-use std::{
-    fmt::{self, Display, Formatter},
-    path::PathBuf,
-    str::FromStr,
-};
+use std::path::PathBuf;
 
 use structopt::StructOpt;
 
@@ -65,63 +61,10 @@ pub struct Options {
     #[structopt(long = "xdg-categories")]
     pub package_xdg_categories: Option<String>,
 
-    /// Rust toolchain channel to use. [example: -t nightly]
-    #[structopt(short = "t", long = "toolchain", default_value = "stable")]
-    pub rust_toolchain_channel: RustToolchainChannel,
-
     /// Cachix cache name. [example: --cachix-name rust-nix-templater]
     #[structopt(long)]
     pub cachix_name: Option<String>,
     /// Cachix cache public key. [example: --cachix-public-key "rust-nix-templater.cachix.org-1:Tmy1V0KK+nxzg0XFePL/++t4JRKAw5tvr+FNfHz7mIY=""]
     #[structopt(long)]
     pub cachix_public_key: Option<String>,
-}
-
-#[derive(Debug)]
-pub enum RustToolchainChannelParseError {
-    Invalid,
-}
-
-impl Display for RustToolchainChannelParseError {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match self {
-            Self::Invalid => write!(f, "Invalid channel name specified. Valid channels are 'stable', 'beta' and 'nightly'."),
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum RustToolchainChannel {
-    Stable,
-    Beta,
-    Nightly,
-}
-
-impl Default for RustToolchainChannel {
-    fn default() -> Self {
-        Self::Stable
-    }
-}
-
-impl FromStr for RustToolchainChannel {
-    type Err = RustToolchainChannelParseError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.to_ascii_lowercase().trim() {
-            "stable" => Ok(Self::Stable),
-            "beta" => Ok(Self::Beta),
-            "nightly" => Ok(Self::Nightly),
-            _ => Err(Self::Err::Invalid),
-        }
-    }
-}
-
-impl Display for RustToolchainChannel {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        match self {
-            Self::Stable => write!(f, "stable"),
-            Self::Beta => write!(f, "beta"),
-            Self::Nightly => write!(f, "nightly"),
-        }
-    }
 }

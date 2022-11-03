@@ -207,10 +207,6 @@ pub fn run_with_options(options: Options, should_print_msg: bool) -> anyhow::Res
     if let Some(long_description) = &options.package_long_description {
         cargo_toml.kv("longDescription", quote(long_description));
     }
-    if options.rust_toolchain_channel != options::RustToolchainChannel::default() {
-        cargo_toml.comment("Toolchain to be used");
-        cargo_toml.kv("toolchain", quote(options.rust_toolchain_channel));
-    }
     if let Some(cachix_name) = &options.cachix_name {
         cargo_toml.attrset(format!("{}.metadata.nix.cachix", parent));
         cargo_toml.comment("Name of the cachix binary cache");
