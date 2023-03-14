@@ -1,3 +1,5 @@
+# THIS PROJECT IS NO LONGER MAINTAINED
+
 # rust-nix-templater
 
 Generates Rust projects that use [nix-cargo-integration].
